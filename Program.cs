@@ -1,16 +1,16 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 
-namespace Hello_Space // Note: actual namespace depends on the project name.
+namespace Hello_Space
 {
     internal class Program
     {
         static void Main(string[] args)
         {
             Console.WriteLine("Hello, Space!");
-            using(Game game = new Game(500, 500))
-            {
-                game.Run();
-            }
+
+            using Game game = new Game(500, 500);
+            game.Run();
         }
     }
 }
