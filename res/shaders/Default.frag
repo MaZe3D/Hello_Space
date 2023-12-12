@@ -11,13 +11,18 @@ layout(location = 4) uniform float left_highSample; //audo sample
 layout(location = 5) uniform float right_lowSample; //audo sample
 layout(location = 6) uniform float right_midSample; //audo sample
 layout(location = 7) uniform float right_highSample; //audo sample
+layout(location = 8) uniform float audioDuration; //audo sample
+layout(location = 9) uniform vec2 mousePos; //audo sample
 
-vec2 UV = gl_FragCoord.xy / resolution.xy;
-float ASPECT_RATIO = float(resolution.x) / float(resolution.y);
-vec2 ACORD = vec2(UV.x * ASPECT_RATIO, UV.y);
-vec2 MAX_DIMENSIONS = vec2(ASPECT_RATIO, 1.0);
-vec2 CENTER = vec2(MAX_DIMENSIONS.x / 2, MAX_DIMENSIONS.y/2);
 const float PI = radians(180);
+vec2  UV = gl_FragCoord.xy / resolution.xy;
+float ASPECT_RATIO = float(resolution.x) / float(resolution.y);
+vec2  ACORD = vec2(UV.x * ASPECT_RATIO, UV.y);
+vec2  MAX_DIMENSIONS = vec2(ASPECT_RATIO, 1.0);
+vec2  CENTER = vec2(MAX_DIMENSIONS.x / 2, MAX_DIMENSIONS.y/2);
+float audioProgress = timestamp / audioDuration;
+float audioProgressLeft = 1.0 - audioProgress;
+vec2 mousePosA = vec2(mousePos.x * MAX_DIMENSIONS.x, mousePos.y * MAX_DIMENSIONS.y);
 
 // Fade Color with Background Color
 vec4 FadeColor(vec4 color, vec4 backgroundColor)
@@ -199,7 +204,7 @@ void main()
 
     //display grid of points
     float pointGridModulation = 1.;//0.04 * (sin(2*PI*timestamp*0.1)+2)/2;
-    FragColor = GeneratePointGrid(vec2(0.025, 0.025), vec2(0.04, 0.04), MAX_DIMENSIONS, 0.003, vec4(0.25, 0.0, 0.25, 1.0), FragColor);
+    FragColor = GeneratePointGrid(vec2(0.025, 0.025), vec2(0.03, 0.03), MAX_DIMENSIONS, 0.003, vec4(0.25, 0.0, 0.25, 1.0), FragColor);
 
     // Colors for the Boxes
     vec4 bassColor = vec4(0.855, 0.251, 1.0, 0.5);
@@ -220,7 +225,7 @@ void main()
 
     float zero = 0.0;
 
-
+    // Colorise the pixels in the background
     FragColor = GenerateGlowingCircle(vec2(left,  lowHeight),  zero, lowRadius  * left_lowSample2,  bassColor, FragColor);
     FragColor = GenerateGlowingCircle(vec2(right, lowHeight),  zero, lowRadius  * right_lowSample2, bassColor, FragColor);
     FragColor = GenerateGlowingCircle(vec2(left,  midHeight),  zero, midRadius  * left_midSample2 , midColor,  FragColor);
@@ -228,7 +233,10 @@ void main()
     FragColor = GenerateGlowingCircle(vec2(left,  highHeight), zero, highRadius * left_highSample2, highColor, FragColor);
     FragColor = GenerateGlowingCircle(vec2(right, highHeight), zero, highRadius * left_highSample2, highColor, FragColor);
 
-    const float roundingsize = 0.05;
+    //Glow around the mouse
+    FragColor = GenerateGlowingCircle(mousePosA, 0.0, 0.3, vec4(0.8, 0.8, 0.8, 0.5), FragColor);
+
+    const float roundingsize = 0.015;
     const float barHeight = 0.1;
     float yOffset = -barHeight / 2;
     float xOffset = roundingsize / 2;
@@ -239,6 +247,33 @@ void main()
 
     //display a thin rectangle in the center
     FragColor = GenerateSqare(vec2(CENTER.x, 0), vec2(0.005, MAX_DIMENSIONS.y), vec4(0.0, 0.0, 0.0, 1.0), FragColor);
+
+
+    //display a black rectangle on the bottom
+    vec2 progressSectionlocation = vec2(0, 0);
+    vec2 progressSectionDimemtions = vec2(MAX_DIMENSIONS.x, 0.07);
+    vec2 progressSectionDimemtionsCenter = progressSectionDimemtions / 2.0;
+    vec4 progressSectionBackgroundColor = vec4(0.0, 0.0, 0.0, 1.0);
+    vec2 progressSectionBorderSize = vec2(0.0, 0.01);
+    vec2 progressIndicatorDimentions = vec2(0.02, progressSectionDimemtions.y - progressSectionBorderSize.y * 2);
+    vec4 progressIndicatorColor = vec4(0.8, 0.0, 0.6, 1.0);
+    vec2 progressIndicatorPosition = vec2(audioProgress * MAX_DIMENSIONS.x, progressSectionBorderSize.y);
+    float progressIndicatorRadius = 0.005;
+    vec4 progressTimeLeftLineColor = vec4(0.4, 0.0, 0.8, 1.0);
+    float progressIndicatorTimeLeftLineWidth = 0.003;
+    vec2 progressSinWaveDimentions = vec2(progressIndicatorPosition.x, progressIndicatorDimentions.y-0.02);
+    float progressSinWaveFrequency = (1 / progressSinWaveDimentions.y)*0.75;
+    float progressSinWavePhase = timestamp * 2;
+    float progressSinWaveSinOffset = 0.0;
+    vec4 progressSinWaveColor = vec4(0.4, 0.0, 1.0, 1.0);
+    float progressSinWaveWidth = 0.005;
+    // vec4 GenerateMaskSinWave(vec2 position, vec2 dimensions, float frequency, float phase, float sinOffset, float borderSize, vec4 color, vec4 backgroundColor)
+    FragColor = GenerateSqare(vec2(0, 0), progressSectionDimemtions, vec4(0.0, 0.0, 0.0, 1.0), FragColor);
+    FragColor = GenerateSqare(vec2(progressIndicatorPosition.x, progressSectionDimemtionsCenter.y), vec2(MAX_DIMENSIONS.x * audioProgressLeft, progressIndicatorTimeLeftLineWidth), progressTimeLeftLineColor, FragColor);
+
+    FragColor = GenerateMaskSinWave(vec2(0, progressSectionBorderSize.y + 0.01), progressSinWaveDimentions, progressSinWaveFrequency, progressSinWavePhase, progressSinWaveSinOffset, progressSinWaveWidth, progressSinWaveColor, FragColor);
+
+    FragColor = GenerateRoundedSquare(vec2(audioProgress * MAX_DIMENSIONS.x, progressSectionBorderSize.y), progressIndicatorDimentions, progressIndicatorRadius, progressIndicatorColor, FragColor);
 
     return;
 }

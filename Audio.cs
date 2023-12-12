@@ -208,6 +208,11 @@ namespace Hello_Space
             audioFileReader.Seek(0, SeekOrigin.Begin);
             waveOut.Init(audioFileReader);
         }
+
+        public void SetPlaybackPosition(TimeSpan time)
+        {
+            audioFileReader.CurrentTime = time;
+        }
     }
 
     public struct StereoAudio

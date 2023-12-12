@@ -24,7 +24,8 @@ namespace Hello_Space
         StereoSample lowPassSample  = new StereoSample(1f, 1f);
         StereoSample midPassSample  = new StereoSample(1f, 1f);
         StereoSample highPassSample = new StereoSample(1f, 1f);
-        float timestamp = 0;
+        float timestamp = 100;
+        Vector2 mousePos = new Vector2(0.5f, 0.5f);
 
         // === Graphics ===
 
@@ -45,7 +46,7 @@ namespace Hello_Space
         int vao;
         int shaderProgram;
         int vbo;
-        Stopwatch playTime = new Stopwatch();
+        SettableStopwatch playTime = new SettableStopwatch(TimeSpan.Zero);
         Stopwatch frameTime = new Stopwatch();
         TimeSpan timeLastFrame = new TimeSpan();
         // width and height of screen
@@ -147,7 +148,6 @@ namespace Hello_Space
                     audio.waveOut.PlaybackStopped += OnPlaybackStopped;
 #pragma warning restore CS8622 // Die NULL-Zulässigkeit von Verweistypen im Typ des Parameters entspricht (möglicherweise aufgrund von Attributen für die NULL-Zulässigkeit) nicht dem Zieldelegaten.
                     audio.StartFromBeginning();
-
                 }
                 catch (FileNotFoundException e)
                 {
@@ -197,6 +197,8 @@ namespace Hello_Space
             GL.Uniform1((int)Locations.Right_LowSample, lowPassSample.Right);
             GL.Uniform1((int)Locations.Right_MidSample, midPassSample.Right);
             GL.Uniform1((int)Locations.Right_HighSample, highPassSample.Right);
+            GL.Uniform1((int)Locations.CompletePlayTime, (float)(audio?.Length ?? 50f));
+            GL.Uniform2((int)Locations.MousePos, mousePos);
 
             GL.DrawArrays(PrimitiveType.TriangleStrip, 0, 4);
 
@@ -206,42 +208,27 @@ namespace Hello_Space
             base.OnRenderFrame(args);
 
             while ((timeLastFrame = frameTime.Elapsed).TotalSeconds < 1d / refreshRate);
-            Title = $"{baseTitle} | FPS: {1f / timeLastFrame.TotalSeconds:00000} | Time: {timestamp:0.00}";
+            Title = $"{baseTitle} | FPS: {1f / timeLastFrame.TotalSeconds:00000} | Elapsed: {timestamp:0.00}";
             frameTime.Restart();
         }
         // called every frame. All updating happens here
         protected override void OnUpdateFrame(FrameEventArgs args)
         {
             const float sampleTime = 0.1f;
-            var timeLastFrame = (float)frameTime.Elapsed.TotalSeconds;
 
             base.OnUpdateFrame(args);
             KeyboardHandler();
+            MouseHander();
 
             try
             {
-                timestamp = (float)(audio?.waveOut.GetPositionTimeSpan().TotalSeconds ?? playTime.Elapsed.TotalSeconds);
+                timestamp = (float)playTime.Elapsed.TotalSeconds;
             }
             catch { }
-
-            var timeOffset = timestamp - timeLastFrame / 2;
-
-            /* lowPassSample = audio?.GetSampleAtTime(timestamp, AudioFrequencyBand.Bass).Left ?? 1f;
-            midPassSample = audio?.GetSampleAtTime(timestamp, AudioFrequencyBand.Mid).Left ?? 1f;
-            highPassSample = audio?.GetSampleAtTime(timestamp, AudioFrequencyBand.High).Left ?? 1f; */
 
             lowPassSample = audio?.GetSampleAtTimeSpan(timestamp, sampleTime, AudioFrequencyBand.Bass) ?? new StereoSample(1f, 1f);
             midPassSample = audio?.GetSampleAtTimeSpan(timestamp, sampleTime, AudioFrequencyBand.Mid) ?? new StereoSample(1f, 1f);
             highPassSample = audio?.GetSampleAtTimeSpan(timestamp, sampleTime, AudioFrequencyBand.High) ?? new StereoSample(1f, 1f);
-        }
-
-        float GetPositiveOrZero(float value)
-        {
-            if (value < 0)
-            {
-                return 0;
-            }
-            return 0.05f;
         }
 
         // Handle Playback Stopped Event
@@ -251,6 +238,7 @@ namespace Hello_Space
             // Restart Audio if it has finished
             audio?.StartFromBeginning();
             audio?.waveOut.Play();
+            playTime.Restart();
         }
 
 
@@ -330,6 +318,27 @@ namespace Hello_Space
             }
         }
 
+        void MouseHander()
+        {
+            mousePos = new Vector2(MouseState.Position.X / resolution.X, 1f - MouseState.Position.Y / resolution.Y);
+
+            if (MouseState.IsButtonDown(MouseButton.Left))
+            {
+                if(mousePos.Y < 0.07)
+                {
+                    TimeSpan time = TimeSpan.FromSeconds(mousePos.X * (audio?.Length ?? 1f));
+                    audio?.SetPlaybackPosition(time);
+                    bool wasRunning = playTime.IsRunning;
+                    playTime = new SettableStopwatch(time);
+                    if (wasRunning)
+                    {
+                        playTime.Start();
+                    }
+                }
+                Debug.WriteLine($"Left Mouse Button Down at {mousePos.X:0.00}, {mousePos.Y:0.00}");
+            }
+        }
+
         //Toggle Stopwatch
         void ToggleStopwatch()
         {
@@ -353,12 +362,34 @@ namespace Hello_Space
         Left_HighSample = 4,
         Right_LowSample = 5,
         Right_MidSample = 6,
-        Right_HighSample = 7
-
+        Right_HighSample = 7,
+        CompletePlayTime = 8,
+        MousePos = 9
     }
 
     struct Features
     {
         public bool Audio;
+    }
+
+    public class SettableStopwatch : Stopwatch
+    {
+        private TimeSpan _offsetTimeSpan;
+
+        public SettableStopwatch(TimeSpan offsetTimeSpan)
+        {
+            _offsetTimeSpan = offsetTimeSpan;
+        }
+
+        public new TimeSpan Elapsed
+        {
+            get { return base.Elapsed + _offsetTimeSpan; }
+        }
+
+        new public void Restart()
+        {
+            base.Restart();
+            _offsetTimeSpan = TimeSpan.Zero;
+        }
     }
 }
