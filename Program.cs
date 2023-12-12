@@ -9,7 +9,7 @@ namespace Hello_Space
         {
             Console.WriteLine("Hello, Space!");
 
-            using Game game = new Game(500, 500);
+            using Game game = new Game(1366, 768, 120);
             game.Run();
         }
     }

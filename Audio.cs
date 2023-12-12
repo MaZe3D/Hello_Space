@@ -21,8 +21,6 @@ namespace Hello_Space
         public double Time => audioFileReader.CurrentTime.TotalSeconds;
         public double Length => audioFileReader.TotalTime.TotalSeconds;
 
-        MeteringSampleProvider meteringSampleProvider;
-
         public StereoAudio defaultData = new StereoAudio();
 
         public StereoAudio bassData = new StereoAudio();
@@ -37,17 +35,24 @@ namespace Hello_Space
             ExtractSamples();
 
             StartFromBeginning();
+#pragma warning disable CS8604 // Mögliches Nullverweisargument.
             bassData.Left = ApplyFilter(defaultData.Left, BiQuadFilter.LowPassFilter((float)SampleRate, 250, 1));
+            bassData.Left = Map(bassData.Left, 0f, 1f, 0f, 1f);
             bassData.Right = ApplyFilter(defaultData.Right, BiQuadFilter.LowPassFilter((float)SampleRate, 250, 1));
+            bassData.Right = Map(bassData.Right, 0f, 1f, 0f, 1f);
 
             StartFromBeginning();
-            midData.Left = ApplyFilter(defaultData.Left, BiQuadFilter.BandPassFilterConstantSkirtGain((float)SampleRate, 1000, 1));
-            midData.Right = ApplyFilter(defaultData.Right, BiQuadFilter.BandPassFilterConstantSkirtGain((float)SampleRate, 1000, 1));
+            midData.Left = ApplyFilter(defaultData.Left, BiQuadFilter.BandPassFilterConstantSkirtGain((float)SampleRate, 600, 1));
+            midData.Left = Map(midData.Left, 0f, 1f, 0f, 1f);
+            midData.Right = ApplyFilter(defaultData.Right, BiQuadFilter.BandPassFilterConstantSkirtGain((float)SampleRate, 600, 1));
+            midData.Right = Map(midData.Right, 0f, 1f, 0f, 1f);
 
             StartFromBeginning();
-            highData.Left = ApplyFilter(defaultData.Left, BiQuadFilter.HighPassFilter((float)SampleRate, 4000, 1));
-            highData.Right = ApplyFilter(defaultData.Right, BiQuadFilter.HighPassFilter((float)SampleRate, 4000, 1));
-
+            highData.Left = ApplyFilter(defaultData.Left, BiQuadFilter.HighPassFilter((float)SampleRate, 1000, 1));
+            highData.Left = Map(highData.Left, 0f, 1f, 0f, 1f);
+            highData.Right = ApplyFilter(defaultData.Right, BiQuadFilter.HighPassFilter((float)SampleRate, 1000, 1));
+            highData.Right = Map(highData.Right, 0f, 1f, 0f, 1f);
+#pragma warning restore CS8604 // Mögliches Nullverweisargument.
 
         }
 
@@ -65,8 +70,6 @@ namespace Hello_Space
 
             int sampleCount = (int)((audioFileReader.Length / sizeof(float) / audioFileReader.WaveFormat.Channels) + 1);
             Debug.WriteLine("Sample Count: " + sampleCount);
-
-            meteringSampleProvider = new MeteringSampleProvider(audioFileReader);
 
             float[] allSamples = new float[sampleCount * audioFileReader.WaveFormat.Channels];
 
@@ -112,11 +115,7 @@ namespace Hello_Space
 
             Debug.WriteLineIf(EnableSampleOutput, $"Sample Index: {sampleIndex}\t Time: {time}\t sampleLeft: {data.Left[sampleIndex]:0.000}\t sampleRight: {data.Right[sampleIndex]:0.000}");
 
-            return new StereoSample
-            {
-                Left = data.Left[sampleIndex],
-                Right = data.Right[sampleIndex]
-            };
+            return new StereoSample(data.Left[sampleIndex], data.Right[sampleIndex]);
         }
 
         public StereoSample GetSampleAtTimeSpan(float offset, float time, AudioFrequencyBand band)
@@ -135,7 +134,7 @@ namespace Hello_Space
                     break;
             }
 
-            var samples = (int)(time / (float)SecondsPerSample);
+            var samples = (int)(time / (float)SecondsPerSample / 2);
             int startIndex = (int)(offset / (float)SecondsPerSample);
             int endIndex = startIndex + samples;
 
@@ -156,18 +155,41 @@ namespace Hello_Space
             for (int i = startIndex; i < endIndex; i++)
             {
                 left += data.Left[i];
-                right += data.Right[i];
+                right += data.Right[i]; 
             }
 
-            var sample = new StereoSample
-            {
-                Left = left / samples,
-                Right = right / samples
-            };
+            var sample = new StereoSample(left / samples, right / samples);
 
-            Debug.WriteLineIf(EnableSampleOutput, $"Sample Index: {samples}\t Time: {time}\t sampleLeft: {sample.Left:0.000}\t sampleRight: {data.Right:0.000}");
+            Debug.WriteLineIf(EnableSampleOutput, $"Sample Index: {samples}\t Time: {time}\t sampleLeft: {sample.Left:0.000}\t sampleRight: {sample.Right:0.000}");
 
             return sample;
+        }
+
+        float Map(float value, float inMin, float inMax, float outMin, float outMax)
+        {
+            if (value < inMin)
+            {
+                return outMin;
+            }
+            else if (value > inMax)
+            {
+                return outMax;
+            }
+            else
+            {
+                return (value - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
+            }
+        }
+
+        float[] Map(float[] values, float inMin, float inMax, float outMin, float outMax)
+        {
+            float[] mappedValues = new float[values.Length];
+            for (int i = 0; i < values.Length; i++)
+            {
+                mappedValues[i] = Map(values[i], inMin, inMax, outMin, outMax);
+            }
+
+            return mappedValues;
         }
 
         float[] ApplyFilter(float[] data, BiQuadFilter filter)
@@ -198,6 +220,12 @@ namespace Hello_Space
     {
         public float Left;
         public float Right;
+        public float Average => (Left + Right) / 2f;
+        public StereoSample(float left, float right)
+        {
+            Left = left;
+            Right = right;
+        }
     }
 
     public enum AudioFrequencyBand

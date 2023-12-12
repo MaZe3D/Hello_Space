@@ -21,11 +21,9 @@ namespace Hello_Space
         };
         Audio? audio;
 
-        float lowPassSample = 1;
-        float midPassSample = 1;
-        float highPassSample = 1;
-        float AudioBasedTime = 0;
-
+        StereoSample lowPassSample  = new StereoSample(1f, 1f);
+        StereoSample midPassSample  = new StereoSample(1f, 1f);
+        StereoSample highPassSample = new StereoSample(1f, 1f);
         float timestamp = 0;
 
         // === Graphics ===
@@ -40,20 +38,31 @@ namespace Hello_Space
             new Vector2(1f,  -1f)  // bottomright vert
         };
 
+        float refreshRate = 60f;
+
+
         // Render Pipeline vars
         int vao;
         int shaderProgram;
         int vbo;
         Stopwatch playTime = new Stopwatch();
         Stopwatch frameTime = new Stopwatch();
+        TimeSpan timeLastFrame = new TimeSpan();
         // width and height of screen
         Vector2i resolution;
 
+        const string baseTitle = "MaZe Music Visualizer";
+
         // Constructor that sets the width, height, and calls the base constructor (GameWindow's Constructor) with default args
-        public Game(int width, int height) : base(GameWindowSettings.Default, NativeWindowSettings.Default)
+        public Game(int width, int height, int refreshRate) : base(GameWindowSettings.Default, NativeWindowSettings.Default)
         {
             this.resolution.X = width;
             this.resolution.Y = height;
+            // set the title of the window;
+            Title = baseTitle;
+
+            // set the refresh rate
+            this.refreshRate = Convert.ToSingle(refreshRate);
 
             // center window
             CenterWindow(new Vector2i(width, height));
@@ -147,6 +156,7 @@ namespace Hello_Space
 
                 }
             }
+            frameTime.Restart();
         }
         // called once when game is closed
         protected override void OnUnload()
@@ -180,9 +190,13 @@ namespace Hello_Space
 
             GL.Uniform1((int)Locations.TimeStamp, timestamp);
             GL.Uniform2((int)Locations.Resolution, resolution);
-            GL.Uniform1((int)Locations.LowSample, lowPassSample);
-            GL.Uniform1((int)Locations.MidSample, midPassSample);
-            GL.Uniform1((int)Locations.HighSample, highPassSample);
+
+            GL.Uniform1((int)Locations.Left_LowSample, lowPassSample.Left);
+            GL.Uniform1((int)Locations.Left_MidSample, midPassSample.Left);
+            GL.Uniform1((int)Locations.Left_HighSample, highPassSample.Left);
+            GL.Uniform1((int)Locations.Right_LowSample, lowPassSample.Right);
+            GL.Uniform1((int)Locations.Right_MidSample, midPassSample.Right);
+            GL.Uniform1((int)Locations.Right_HighSample, highPassSample.Right);
 
             GL.DrawArrays(PrimitiveType.TriangleStrip, 0, 4);
 
@@ -190,13 +204,17 @@ namespace Hello_Space
             Context.SwapBuffers();
 
             base.OnRenderFrame(args);
+
+            while ((timeLastFrame = frameTime.Elapsed).TotalSeconds < 1d / refreshRate);
+            Title = $"{baseTitle} | FPS: {1f / timeLastFrame.TotalSeconds:00000} | Time: {timestamp:0.00}";
             frameTime.Restart();
         }
         // called every frame. All updating happens here
         protected override void OnUpdateFrame(FrameEventArgs args)
         {
-            var timeLastFrame = 0.1f;//(float)frameTime.Elapsed.TotalSeconds;
-            frameTime.Restart();
+            const float sampleTime = 0.1f;
+            var timeLastFrame = (float)frameTime.Elapsed.TotalSeconds;
+
             base.OnUpdateFrame(args);
             KeyboardHandler();
 
@@ -212,9 +230,9 @@ namespace Hello_Space
             midPassSample = audio?.GetSampleAtTime(timestamp, AudioFrequencyBand.Mid).Left ?? 1f;
             highPassSample = audio?.GetSampleAtTime(timestamp, AudioFrequencyBand.High).Left ?? 1f; */
 
-            lowPassSample = audio?.GetSampleAtTimeSpan(timeOffset, timeLastFrame, AudioFrequencyBand.Bass).Left ?? 1f;
-            midPassSample = audio?.GetSampleAtTimeSpan(timeOffset, timeLastFrame, AudioFrequencyBand.Mid).Left ?? 1f;
-            highPassSample = audio?.GetSampleAtTimeSpan(timeOffset, timeLastFrame, AudioFrequencyBand.High).Left ?? 1f;
+            lowPassSample = audio?.GetSampleAtTimeSpan(timestamp, sampleTime, AudioFrequencyBand.Bass) ?? new StereoSample(1f, 1f);
+            midPassSample = audio?.GetSampleAtTimeSpan(timestamp, sampleTime, AudioFrequencyBand.Mid) ?? new StereoSample(1f, 1f);
+            highPassSample = audio?.GetSampleAtTimeSpan(timestamp, sampleTime, AudioFrequencyBand.High) ?? new StereoSample(1f, 1f);
         }
 
         float GetPositiveOrZero(float value)
@@ -330,9 +348,12 @@ namespace Hello_Space
     {
         TimeStamp = 0,
         Resolution = 1,
-        LowSample = 2,
-        MidSample = 3,
-        HighSample = 4
+        Left_LowSample = 2,
+        Left_MidSample = 3,
+        Left_HighSample = 4,
+        Right_LowSample = 5,
+        Right_MidSample = 6,
+        Right_HighSample = 7
 
     }
 
