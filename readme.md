@@ -92,4 +92,41 @@ Der Fragment-Shader ist, in diesem Fall, gänzlich für die Darstellung aller An
 
 Der Fragment-Shader wird für jedes einzelne Pixel welches sich auf der Leinwand befindet aufgerufen. Für eine Anwendung mit eine Auflösung von 1920x1080 Pixeln entspricht das 2.073.600 Mal.
 
-Der einzelnen Programmroutine wird standardmäßig die Koordinate des derzeit zu berechnenden Pixels übergeben.
+Der einzelnen Programmroutine wird standardmäßig die Koordinate des derzeit zu berechnenden  `gl_FragCoord` übergeben. Die Aufgabe des Shaders besteht nun darin den vierdimensionalen Vector `FragColor` zu beschreiben und damit die Farbe des derzeit berechneten Pixels zu setzen.
+
+```glsl
+out vec4 FragColor;
+in vec4 gl_FragCoord;
+```
+
+Der Shader wurde so aufgebaut dass eine Kollektion an Funktionen hochparametrisierten Funktionen existiert, mit deren Verkettung das darzustellende Pixel leztendlich berechnet wird.
+So kann beispielweise ein Quadrat erzeugt werden indem die Funktion `vec4 GenerateSqare(...)` aufruft.
+
+```glsl
+vec4 GenerateSqare(vec2 position, vec2 dimentions, vec4 color, vec4 backgroundColor)
+{
+    vec4 result = backgroundColor;
+
+    // if dimensions are negative, shift the position and make them positive
+    if (dimentions.x < 0.0)
+    {
+        position.x += dimentions.x;
+        dimentions.x = -dimentions.x;
+    }
+    if (dimentions.y < 0.0)
+    {
+        position.y += dimentions.y;
+        dimentions.y = -dimentions.y;
+    }
+    // Colorise the pixel if it is inside the square
+    if (ACORD.x > position.x && ACORD.x < position.x + dimentions.x &&
+        ACORD.y > position.y && ACORD.y < position.y + dimentions.y)
+    {
+        result = color;
+    }
+
+    // blend with the background color
+    return result;
+}
+```
+

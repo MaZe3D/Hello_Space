@@ -55,8 +55,6 @@ vec4 GenerateSqare(vec2 position, vec2 dimentions, vec4 color, vec4 backgroundCo
     }
 
     // blend with the background color
-    result = FadeColor(result, backgroundColor);
-
     return result;
 }
 
