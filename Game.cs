@@ -326,7 +326,10 @@ namespace Hello_Space
             {
                 if(mousePos.Y < 0.07)
                 {
-                    TimeSpan time = TimeSpan.FromSeconds(mousePos.X * (audio?.Length ?? 1f));
+                    float cursorpos = mousePos.X;
+                    if (cursorpos < 0f) cursorpos = 0;
+                    if (cursorpos > 1f) cursorpos = 1;
+                    TimeSpan time = TimeSpan.FromSeconds(cursorpos * (audio?.Length ?? 1f));
                     audio?.SetPlaybackPosition(time);
                     bool wasRunning = playTime.IsRunning;
                     playTime = new SettableStopwatch(time);

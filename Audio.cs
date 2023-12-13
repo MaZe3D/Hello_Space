@@ -155,7 +155,7 @@ namespace Hello_Space
             for (int i = startIndex; i < endIndex; i++)
             {
                 left += data.Left[i];
-                right += data.Right[i]; 
+                right += data.Right[i];
             }
 
             var sample = new StereoSample(left / samples, right / samples);
