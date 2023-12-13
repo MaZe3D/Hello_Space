@@ -22,6 +22,7 @@ Am Ende der Audiowiedergabe wird die Wiedergabe von neuem gestartet. Die Anwendu
 | `S` | Gibt einen detaillierte Informationen zu den berechneten Frequenzen im Standard Debug Output aus |
 
 ## Funktionsweise
+Der Programmablauf sieht vor dass 
 
 ### Audio
 

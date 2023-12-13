@@ -21,8 +21,8 @@ namespace Hello_Space
         };
         Audio? audio;
 
-        StereoSample lowPassSample  = new StereoSample(1f, 1f);
-        StereoSample midPassSample  = new StereoSample(1f, 1f);
+        StereoSample lowPassSample = new StereoSample(1f, 1f);
+        StereoSample midPassSample = new StereoSample(1f, 1f);
         StereoSample highPassSample = new StereoSample(1f, 1f);
         float timestamp = 100;
         Vector2 mousePos = new Vector2(0.5f, 0.5f);
@@ -51,7 +51,8 @@ namespace Hello_Space
         TimeSpan timeLastFrame = new TimeSpan();
         // width and height of screen
         Vector2i resolution;
-
+        bool mouseBloomEnabled = true;
+        float mouseBloom = 0.3f;
         const string baseTitle = "MaZe Music Visualizer";
 
         // Constructor that sets the width, height, and calls the base constructor (GameWindow's Constructor) with default args
@@ -156,6 +157,7 @@ namespace Hello_Space
 
                 }
             }
+            playTime = new SettableStopwatch(TimeSpan.Zero);
             frameTime.Restart();
         }
         // called once when game is closed
@@ -199,6 +201,7 @@ namespace Hello_Space
             GL.Uniform1((int)Locations.Right_HighSample, highPassSample.Right);
             GL.Uniform1((int)Locations.CompletePlayTime, (float)(audio?.Length ?? 50f));
             GL.Uniform2((int)Locations.MousePos, mousePos);
+            GL.Uniform1((int)Locations.MouseBloom, mouseBloom);
 
             GL.DrawArrays(PrimitiveType.TriangleStrip, 0, 4);
 
@@ -207,7 +210,7 @@ namespace Hello_Space
 
             base.OnRenderFrame(args);
 
-            while ((timeLastFrame = frameTime.Elapsed).TotalSeconds < 1d / refreshRate);
+            while ((timeLastFrame = frameTime.Elapsed).TotalSeconds < 1d / refreshRate) ;
             Title = $"{baseTitle} | FPS: {1f / timeLastFrame.TotalSeconds:00000} | Elapsed: {timestamp:0.00}";
             frameTime.Restart();
         }
@@ -288,25 +291,7 @@ namespace Hello_Space
 
             if (KeyboardState.IsKeyPressed(Keys.Space)) // Space -> Play/Pause
             {
-                if (audio != null)
-                {
-                    switch (audio.waveOut.PlaybackState)
-                    {
-                        case PlaybackState.Playing:
-                            Debug.WriteLine("Pausing Playback");
-                            audio.waveOut.Pause();
-                            break;
-                        case PlaybackState.Paused:
-                            Debug.WriteLine("Resuming Playback");
-                            audio.waveOut.Play();
-                            break;
-                        default:
-                            Debug.WriteLine("Starting Playback");
-                            audio.waveOut.Play();
-                            break;
-                    }
-                    ToggleStopwatch();
-                }
+                ToggleStopwatch();
             }
 
             if (KeyboardState.IsKeyPressed(Keys.S)) // toggle enableSampleDebugOutput
@@ -316,6 +301,12 @@ namespace Hello_Space
                     audio.EnableSampleOutput = !audio.EnableSampleOutput;
                 }
             }
+
+            if (KeyboardState.IsKeyPressed(Keys.M)) // toggle mouseBloom
+            {
+                mouseBloomEnabled = !mouseBloomEnabled;
+                mouseBloom = mouseBloomEnabled ? 0.3f : 0.0f;
+            }
         }
 
         void MouseHandler()
@@ -324,7 +315,7 @@ namespace Hello_Space
 
             if (MouseState.IsButtonDown(MouseButton.Left))
             {
-                if(mousePos.Y < 0.07)
+                if (mousePos.Y < 0.07)
                 {
                     float cursorpos = mousePos.X;
                     if (cursorpos < 0f) cursorpos = 0;
@@ -348,9 +339,12 @@ namespace Hello_Space
             if (playTime.IsRunning)
             {
                 playTime.Stop();
+                audio?.waveOut.Pause();
             }
             else
             {
+                playTime = new SettableStopwatch(audio?.Time ?? playTime.Elapsed);
+                audio?.waveOut.Play();
                 playTime.Start();
             }
         }
@@ -367,7 +361,8 @@ namespace Hello_Space
         Right_MidSample = 6,
         Right_HighSample = 7,
         CompletePlayTime = 8,
-        MousePos = 9
+        MousePos = 9,
+        MouseBloom = 10
     }
 
     struct Features

@@ -13,6 +13,7 @@ layout(location = 6) uniform float right_midSample; //audo sample
 layout(location = 7) uniform float right_highSample; //audo sample
 layout(location = 8) uniform float audioDuration; //audo sample
 layout(location = 9) uniform vec2 mousePos; //audo sample
+layout(location = 10) uniform float mouseBloom; //radius of the mouseBloom
 
 const float PI = radians(180);
 vec2  UV = gl_FragCoord.xy / resolution.xy;
@@ -234,7 +235,7 @@ void main()
     FragColor = GenerateGlowingCircle(vec2(right, highHeight), zero, highRadius * left_highSample2, highColor, FragColor);
 
     //Glow around the mouse
-    FragColor = GenerateGlowingCircle(mousePosA, 0.0, 0.2, vec4(0.8, 0.8, 0.8, 0.5), FragColor);
+    FragColor = GenerateGlowingCircle(mousePosA, 0.0, mouseBloom, vec4(0.8, 0.8, 0.8, 0.5), FragColor);
 
     const float roundingsize = 0.015;
     const float barHeight = 0.1;
