@@ -199,7 +199,7 @@ namespace Hello_Space
             GL.Uniform1((int)Locations.Right_LowSample, lowPassSample.Right);
             GL.Uniform1((int)Locations.Right_MidSample, midPassSample.Right);
             GL.Uniform1((int)Locations.Right_HighSample, highPassSample.Right);
-            GL.Uniform1((int)Locations.CompletePlayTime, (float)(audio?.Length ?? 50f));
+            GL.Uniform1((int)Locations.CompletePlayTime, (float)(audio?.Length.TotalSeconds ?? 50f));
             GL.Uniform2((int)Locations.MousePos, mousePos);
             GL.Uniform1((int)Locations.MouseBloom, mouseBloom);
 
@@ -211,7 +211,7 @@ namespace Hello_Space
             base.OnRenderFrame(args);
 
             while ((timeLastFrame = frameTime.Elapsed).TotalSeconds < 1d / refreshRate) ;
-            Title = $"{baseTitle} | FPS: {1f / timeLastFrame.TotalSeconds:00000} | Elapsed: {timestamp:0.00}";
+            Title = $"{baseTitle} | FPS: {1f / timeLastFrame.TotalSeconds:0000} | Progress: {playTime.Elapsed:hh\\:mm\\:ss} / {audio?.Length ?? TimeSpan.Zero:hh\\:mm\\:ss}";
             frameTime.Restart();
         }
         // called every frame. All updating happens here
@@ -305,7 +305,7 @@ namespace Hello_Space
             if (KeyboardState.IsKeyPressed(Keys.M)) // toggle mouseBloom
             {
                 mouseBloomEnabled = !mouseBloomEnabled;
-                mouseBloom = mouseBloomEnabled ? 0.3f : 0.0f;
+                mouseBloom = mouseBloomEnabled ? 0.15f : 0.0f;
             }
         }
 
@@ -320,7 +320,7 @@ namespace Hello_Space
                     float cursorpos = mousePos.X;
                     if (cursorpos < 0f) cursorpos = 0;
                     if (cursorpos > 1f) cursorpos = 1;
-                    TimeSpan time = TimeSpan.FromSeconds(cursorpos * (audio?.Length ?? 1f));
+                    TimeSpan time = cursorpos * (audio?.Length ?? TimeSpan.MaxValue);
                     audio?.SetPlaybackPosition(time);
                     bool wasRunning = playTime.IsRunning;
                     playTime = new SettableStopwatch(time);

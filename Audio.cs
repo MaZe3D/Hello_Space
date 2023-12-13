@@ -19,7 +19,7 @@ namespace Hello_Space
         public double SampleRate => Convert.ToDouble(audioFileReader.WaveFormat.SampleRate);
         public double SecondsPerSample => 1.0d / SampleRate;
         public TimeSpan Time => audioFileReader.CurrentTime;
-        public double Length => audioFileReader.TotalTime.TotalSeconds;
+        public TimeSpan Length => audioFileReader.TotalTime;
 
         public StereoAudio defaultData = new StereoAudio();
 

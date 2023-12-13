@@ -165,6 +165,7 @@ vec4 GeneratePointGrid(vec2 position, vec2 dist, vec2 size, float radius, vec4 c
         for(int j = 0; j < numberX; j++)
         {
             result = GenerateCircle(currentPos, radius, color, result);
+            if (result != color)
             currentPos.x += ASPECT_RATIO / numberX;
         }
         currentPos.y += 1.0 / numberY;
@@ -208,9 +209,9 @@ void main()
     FragColor = GeneratePointGrid(vec2(0.025, 0.025), vec2(0.03, 0.03), MAX_DIMENSIONS, 0.003, vec4(0.25, 0.0, 0.25, 1.0), FragColor);
 
     // Colors for the Boxes
-    vec4 bassColor = vec4(0.855, 0.251, 1.0, 0.5);
-    vec4 midColor = vec4(0.251, 0.659, 1.0, 0.5);
-    vec4 highColor = vec4(0.251, 1.0, 0.855, 0.5);
+    vec4 bassColor = vec4(0.855, 0.251, 1.0, 0.7);
+    vec4 midColor = vec4(0.251, 0.659, 1.0, 0.7);
+    vec4 highColor = vec4(0.251, 1.0, 0.855, 0.7);
 
     //position
     float lowHeight = CENTER.y / 2;
