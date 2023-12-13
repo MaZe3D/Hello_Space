@@ -234,7 +234,7 @@ void main()
     FragColor = GenerateGlowingCircle(vec2(right, highHeight), zero, highRadius * left_highSample2, highColor, FragColor);
 
     //Glow around the mouse
-    FragColor = GenerateGlowingCircle(mousePosA, 0.0, 0.3, vec4(0.8, 0.8, 0.8, 0.5), FragColor);
+    FragColor = GenerateGlowingCircle(mousePosA, 0.0, 0.2, vec4(0.8, 0.8, 0.8, 0.5), FragColor);
 
     const float roundingsize = 0.015;
     const float barHeight = 0.1;

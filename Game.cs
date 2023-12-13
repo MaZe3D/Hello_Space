@@ -218,7 +218,7 @@ namespace Hello_Space
 
             base.OnUpdateFrame(args);
             KeyboardHandler();
-            MouseHander();
+            MouseHandler();
 
             try
             {
@@ -318,7 +318,7 @@ namespace Hello_Space
             }
         }
 
-        void MouseHander()
+        void MouseHandler()
         {
             mousePos = new Vector2(MouseState.Position.X / resolution.X, 1f - MouseState.Position.Y / resolution.Y);
 
