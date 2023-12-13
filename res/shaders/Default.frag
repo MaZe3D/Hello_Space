@@ -252,30 +252,32 @@ void main()
 
 
     //display a black rectangle on the bottom
-    vec2 progressSectionlocation = vec2(0, 0);
-    vec2 progressSectionDimemtions = vec2(MAX_DIMENSIONS.x, 0.07);
-    vec2 progressSectionDimemtionsCenter = progressSectionDimemtions / 2.0;
-    vec4 progressSectionBackgroundColor = vec4(0.0, 0.0, 0.0, 1.0);
-    vec2 progressSectionBorderSize = vec2(0.0, 0.01);
-    vec2 progressIndicatorDimentions = vec2(0.02, progressSectionDimemtions.y - progressSectionBorderSize.y * 2);
-    vec4 progressIndicatorColor = vec4(0.8, 0.0, 0.6, 1.0);
-    vec2 progressIndicatorPosition = vec2(audioProgress * MAX_DIMENSIONS.x, progressSectionBorderSize.y);
+    vec2  progressSectionlocation               = vec2(0, 0);
+    vec2  progressSectionDimemtions             = vec2(MAX_DIMENSIONS.x, 0.07);
+    vec2  progressSectionDimemtionsCenter       = progressSectionDimemtions / 2.0;
+    vec4  progressSectionBackgroundColor        = vec4(0.0, 0.0, 0.0, 1.0);
+    vec2  progressSectionBorderSize             = vec2(0.0, 0.01);
+    vec2  progressIndicatorDimentions           = vec2(0.02, progressSectionDimemtions.y - progressSectionBorderSize.y * 2);
+    vec4  progressIndicatorColor                = vec4(0.8, 0.0, 0.6, 1.0);
+    float progressIndicatorMaxValue = MAX_DIMENSIONS.x - progressIndicatorDimentions.x;
+    vec2  progressIndicatorPosition = vec2(audioProgress * progressIndicatorMaxValue, progressSectionBorderSize.y);
     float progressIndicatorRadius = 0.005;
-    vec4 progressTimeLeftLineColor = vec4(0.4, 0.0, 0.8, 1.0);
+    vec4  progressTimeLeftLineColor = vec4(0.4, 0.0, 0.8, 1.0);
     float progressIndicatorTimeLeftLineWidth = 0.003;
-    vec2 progressSinWaveDimentions = vec2(progressIndicatorPosition.x, progressIndicatorDimentions.y-0.02);
+    vec2  progressSinWaveDimentions = vec2(progressIndicatorPosition.x, progressIndicatorDimentions.y-0.02);
     float progressSinWaveFrequency = (1 / progressSinWaveDimentions.y)*0.75;
     float progressSinWavePhase = timestamp * 2;
     float progressSinWaveSinOffset = 0.0;
-    vec4 progressSinWaveColor = vec4(0.4, 0.0, 1.0, 1.0);
+    vec4  progressSinWaveColor = vec4(0.4, 0.0, 1.0, 1.0);
     float progressSinWaveWidth = 0.005;
+
     // vec4 GenerateMaskSinWave(vec2 position, vec2 dimensions, float frequency, float phase, float sinOffset, float borderSize, vec4 color, vec4 backgroundColor)
     FragColor = GenerateSqare(vec2(0, 0), progressSectionDimemtions, vec4(0.0, 0.0, 0.0, 1.0), FragColor);
-    FragColor = GenerateSqare(vec2(progressIndicatorPosition.x, progressSectionDimemtionsCenter.y), vec2(MAX_DIMENSIONS.x * audioProgressLeft, progressIndicatorTimeLeftLineWidth), progressTimeLeftLineColor, FragColor);
+    FragColor = GenerateSqare(vec2(progressIndicatorPosition.x, progressSectionDimemtionsCenter.y), vec2(MAX_DIMENSIONS.x - progressIndicatorPosition.x, progressIndicatorTimeLeftLineWidth), progressTimeLeftLineColor, FragColor);
 
     FragColor = GenerateMaskSinWave(vec2(0, progressSectionBorderSize.y + 0.01), progressSinWaveDimentions, progressSinWaveFrequency, progressSinWavePhase, progressSinWaveSinOffset, progressSinWaveWidth, progressSinWaveColor, FragColor);
 
-    FragColor = GenerateRoundedSquare(vec2(audioProgress * MAX_DIMENSIONS.x, progressSectionBorderSize.y), progressIndicatorDimentions, progressIndicatorRadius, progressIndicatorColor, FragColor);
+    FragColor = GenerateRoundedSquare(progressIndicatorPosition, progressIndicatorDimentions, progressIndicatorRadius, progressIndicatorColor, FragColor);
 
     return;
 }

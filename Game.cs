@@ -20,7 +20,7 @@ namespace Hello_Space
             Audio = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
         };
         Audio? audio;
-
+        double timeFromAudioStream = 0d;
         StereoSample lowPassSample = new StereoSample(1f, 1f);
         StereoSample midPassSample = new StereoSample(1f, 1f);
         StereoSample highPassSample = new StereoSample(1f, 1f);
@@ -157,7 +157,6 @@ namespace Hello_Space
 
                 }
             }
-            playTime = new SettableStopwatch(TimeSpan.Zero);
             frameTime.Restart();
         }
         // called once when game is closed
@@ -244,8 +243,6 @@ namespace Hello_Space
             playTime.Restart();
         }
 
-
-
         public static string LoadShaderSource(string resourcePath)
         {
             string shaderSource = "";
@@ -317,15 +314,18 @@ namespace Hello_Space
             {
                 if (mousePos.Y < 0.07)
                 {
+                    audio?.waveOut.Pause();
                     float cursorpos = mousePos.X;
                     if (cursorpos < 0f) cursorpos = 0;
-                    if (cursorpos > 1f) cursorpos = 1;
-                    TimeSpan time = cursorpos * (audio?.Length ?? TimeSpan.MaxValue);
-                    audio?.SetPlaybackPosition(time);
+                    if (cursorpos > 0.99f) cursorpos = 0.99f;
+                    TimeSpan newTime = TimeSpan.FromSeconds(cursorpos * (float)(audio?.Length.TotalSeconds ?? TimeSpan.FromSeconds(60).TotalSeconds));
+                    Debug.WriteLine($"New Time: {newTime:c}");
+                    audio?.SetPlaybackPosition(newTime);
                     bool wasRunning = playTime.IsRunning;
-                    playTime = new SettableStopwatch(time);
+                    playTime = new SettableStopwatch(audio.Time);
                     if (wasRunning)
                     {
+                        audio?.waveOut.Play();
                         playTime.Start();
                     }
                 }
@@ -338,13 +338,13 @@ namespace Hello_Space
         {
             if (playTime.IsRunning)
             {
-                playTime.Stop();
                 audio?.waveOut.Pause();
+                playTime.Stop();
             }
             else
             {
-                playTime = new SettableStopwatch(audio?.Time ?? playTime.Elapsed);
                 audio?.waveOut.Play();
+                playTime = new SettableStopwatch(audio?.Time ?? playTime.Elapsed);
                 playTime.Start();
             }
         }
