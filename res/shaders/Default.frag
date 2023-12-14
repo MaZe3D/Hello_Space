@@ -203,7 +203,7 @@ void main()
     FragColor = vec4(0.0, 0.0, 0.0, 0.0);
 
     //display grid of points
-    float pointGridModulation = 1.;//0.04 * (sin(2*PI*timestamp*0.1)+2)/2;
+    float pointGridModulation = 1.;
     FragColor = GeneratePointGrid(vec2(0.025, 0.025), vec2(0.03, 0.03), MAX_DIMENSIONS, 0.003, vec4(0.25, 0.0, 0.25, 1.0), FragColor);
 
     // Colors for the Boxes

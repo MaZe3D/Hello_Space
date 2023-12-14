@@ -9,10 +9,11 @@ Die Anwendung kann mit dem Befehl `dotnet run` ausgeführt werden.
 Bei dem Bauvorgang wird das Verzeichnis `res/` vollständig zur Binary kopiert. Die Dateien in diesem Verzeichnis werden zur Laufzeit benötigt.
 
 ## Systemanforderungen
-Die Anwendung benötigt einen modernen Grafikprozessor mit Unterstützung für OpenGL 4.3, sowie eine CPU mit mindestens 4 Kernen. 
+Die Anwendung benötigt einen modernen Grafikprozessor mit Unterstützung für OpenGL 4.3, sowie eine CPU mit mindestens 4 Kernen.
 
-Getestet wurde die Anwendndung auf einem AMD Ryzen™ 7 2700X (8 Kerne, 16 Threads) und einer Nvidia GeForce RTX 2080Ti 6GB.
-Zusätzlich fand ein Laptop mit einem Intel® Core™ H35 i7-11370H. 
+Getestet wurde die Anwendung auf einem AMD Ryzen™ 7 2700X (8 Kerne, 16 Threads) und einer Nvidia GeForce™ RTX 2080 Ti mit 11GB.
+Zusätzlich fand ein Laptop mit einem Intel® Core™ H35 i7-11370H und einer Nvidia GeForce™ RTX 3050 Ti Laptop GPU mit 6GB Verwendung.
+Auf beiden Systemen war der Shader ohne Probleme ausführbar, jedoch ist die Berechnung der Audio Samples für jeden Frame rechenaufwendig, weshalb bei Laptops die Verwendung eines Netzteils empfohlen wird, um die volle Leistung des Systems zu gewährleisten. In voller Geschwindigkeit läuft die Anwendung mit ca. 120 FPS, darunter ist ein Leistungsgrenze erkenntlich.
 
 ## Verwendung
 Das Programm benötigt eine Audiodatei im FLAC-Format. Diese muss im Verzeichnis `res/audio/` liegen und `audio.flac` heißen. Der `res/` Ordner muss sich im selben Verzeichnis wie die Binary befinden.
@@ -21,7 +22,6 @@ Nach Programmstart lädt die Anwendung die Audiodatei und bereitet die Visualisi
 Am Ende der Audiowiedergabe wird die Wiedergabe von neuem gestartet. Die Anwendung kann mit der `Escape` Taste beendet werden.
 
 ### Tastenbelegung
-
 | Taste | Funktion |
 | --- | --- |
 | `Escape` | Beendet die Anwendung. |
@@ -34,7 +34,7 @@ Am Ende der Audiowiedergabe wird die Wiedergabe von neuem gestartet. Die Anwendu
 Die Software verfügt über die Möglichkeit mithilfe eines Mausklicks oder -ziehens die Wiedergabeposition anzupassen. Hierfür muss auf dem Fortschrittsbalken auf dem unteren Bildschirmrand geklickt werden.
 
 ## Funktionsweise
-Der Programmablauf sieht vor dass zunächst das Fenster erstellt wird. Im Konstruktor des Fensters wird ebenfalls die Audiobibliothek initialisiert. Darauf hin
+Der Programmablauf sieht vor dass zunächst das Fenster erstellt wird. Im Konstruktor des Fensters wird ebenfalls die Audiobibliothek initialisiert. Darauf hin werden sämtliche Vorbereitungen zur Darstellung des Shaders getroffen. Der Vertex und Fragment Shader werden geladen und schließlich werden die Bilder berechnet.
 
 ### Audio
 Zur Aufbereitung der Audiodaten bedarf es einiger schritte, sodass die Visualisierung ansprechend aussieht.
@@ -117,7 +117,7 @@ layout(location = 5)  uniform float right_lowSample; //audo sample
 layout(location = 6)  uniform float right_midSample; //audo sample
 layout(location = 7)  uniform float right_highSample; //audo sample
 layout(location = 8)  uniform float audioDuration; //audo sample
-layout(location = 9)  uniform vec2 mousePos; //audo sample
+layout(location = 9)  uniform vec2  mousePos; //audo sample
 layout(location = 10) uniform float mouseBloom; //radius of the mouseBloom
 ```
 
@@ -293,3 +293,17 @@ Das Programm ruft nun diese Funktionen auf um die Visualisierung anzuzeigen.
 
 Nun kann der Shader aus allen Grundkomponenten zusammengesetzt werden.
 Zunächst wird ein geleichmäßiges Punkteraster auf dem Bildschirmhintergrund angezeigt. Das geschieht mit der `GeneratePointGrid(...)`-Funktion welche wiederholt die GenerateCircle Funktion aufruft.
+
+Daraufhin werden die abgerundete Rechtecke berechnet welche die Audioausschläge anzeigen. Dabei wird 1 Rechteck erstellt welches sowohl die Samples des rechten als auch linken Audiokanals anzeigt. Dabei werden beine Werte addiert und die linke Position wird von der Mitte aus um den wert des linken Audiokanals nach links verschoben. Dies geschieht drei mal, einmal für die Bässe, einmal für die Mitten und einmal für die Höhen.
+
+Für einen ansprechenden Glow-Effekt werden nun für jeden Kanal und Frequenzbereich links und rechts von den Audioausschlägen zwei Kreise mit Glow-Effekt gezeichnet. Durch den dunklen Hintergrund und die dezenten kreise im Hintergrund, sieht es bei der Überlagerung aus als würden nur die kreise dieses Pixelrasters leuchten, nicht jedoch der Zwischenraum.
+
+Der Fortschrittsbalken kennzeichnet sich durch einen hochkant stehenden, abgerundeten Rechteck, welcher sich vom linken bis zum rechten Rand des Bildschirms erstreckt. Die Position des Rechtecks wird durch den `audioProgress` bestimmt. Links des Rechtecks wird die bereits Abgespielte Zeit durch einen laufenden Sinus gekennzeichnet, die verbleibende Zeit durch einen geraden Strich.
+Hierbei kommt der Maskierte Sinus zum Einsatz da dieser diesen Effekt mit nur einem Funktionsaufruf ermöglicht.
+
+Der Mauszeiger wird durch einen Kreis mit Glow-Effekt dargestellt. Der Radius des Kreises wird durch die Variable `mouseBloom` bestimmt. Die Position des Kreises wird durch die Variable `mousePosA` bestimmt. Die Variable `mousePosA` ist die Position des Mauszeigers, jedoch mit dem Seitenverhältnis des Fensters korrigiert.
+---
+
+# Lizenz
+Die Anwendung steht unter der MIT Lizenz. Das bedeutet, dass der Quellcode frei verwendet werden darf, solange die Lizenzbedingungen eingehalten werden. Die Lizenzbedingungen sind in der Datei `LICENSE` zu finden.
+Die im Repository befindliche Audiodatei im Verzeichnis `/res/audio/audio.flac` steht unter dem Copyright von Mark Orlando Zeller. Die Datei steht lediglich zu Bildungszwecken und zur Evaluierung der Funktionsweise dieses Projektes zur Verfügung.
