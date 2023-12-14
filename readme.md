@@ -304,8 +304,9 @@ Der Fortschrittsbalken kennzeichnet sich durch einen hochkant stehenden, abgerun
 Hierbei kommt der Maskierte Sinus zum Einsatz da dieser diesen Effekt mit nur einem Funktionsaufruf ermöglicht.
 
 Der Mauszeiger wird durch einen Kreis mit Glow-Effekt dargestellt. Der Radius des Kreises wird durch die Variable `mouseBloom` bestimmt. Die Position des Kreises wird durch die Variable `mousePosA` bestimmt. Die Variable `mousePosA` ist die Position des Mauszeigers, jedoch mit dem Seitenverhältnis des Fensters korrigiert.
+
 ---
 
 # Lizenz
 Die Anwendung steht unter der MIT Lizenz. Das bedeutet, dass der Quellcode frei verwendet werden darf, solange die Lizenzbedingungen eingehalten werden. Die Lizenzbedingungen sind in der Datei `LICENSE` zu finden.
-Die im Repository befindliche Audiodatei im Verzeichnis `/res/audio/audio.flac` steht unter dem Copyright von Mark Orlando Zeller. Die Datei steht lediglich zu Bildungszwecken und zur Evaluierung der Funktionsweise dieses Projektes zur Verfügung.
+Die im Repository befindliche Audiodatei im Verzeichnis [`/res/audio/audio.flac`](res/audio/audio.flac) steht unter dem Copyright von Mark Orlando Zeller. Die Datei steht lediglich zu Bildungszwecken und zur Evaluierung der Funktionsweise dieses Projektes zur Verfügung.
