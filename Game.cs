@@ -10,7 +10,6 @@ using NAudio.Dsp;
 using System.Runtime.InteropServices;
 using NAudio.Utils;
 
-
 namespace Hello_Space
 {
     internal class Game : GameWindow
@@ -151,10 +150,9 @@ namespace Hello_Space
 #pragma warning restore CS8622 // Die NULL-Zulässigkeit von Verweistypen im Typ des Parameters entspricht (möglicherweise aufgrund von Attributen für die NULL-Zulässigkeit) nicht dem Zieldelegaten.
                     audio.StartFromBeginning();
                 }
-                catch (FileNotFoundException e)
+                catch (Exception e)
                 {
                     Debug.WriteLine($"Error while loading audio: {e.Message}");
-                    Debug.WriteLine($"Feature {nameof(features.Audio)} is disabled.");
                     Close();
                 }
             }

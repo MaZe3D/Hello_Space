@@ -62,6 +62,9 @@ public StereoAudio midData;
 public StereoAudio highData;
 ```
 
+Nun kann bei jedem Bild die aktuelle Wiedergabezeit herangezogen werden um die Samples zu berechnen welche in diesem Zeitraum abgespielt werden. Bei jedem Frame werden `0,1s` an Samples ausgewertet und arithmetisch gemittelt. Dies geschieht in der Funktion Get
+
+
 ### Shader
 Die Anwendung basiert auf OpenGL 4.3 und verwendet die [OpenTK](https://opentk.net/) Bibliothek für die Interaktion mit OpenGL. Die Shader werden mit [GLSL](https://www.khronos.org/opengl/wiki/Core_Language_(GLSL)) geschrieben.
 
