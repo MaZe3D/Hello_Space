@@ -1,6 +1,8 @@
 # MaZe Music Visualizer
 Der MaZe Music Visualizer ist eine graphische Desktopanwendung zur Visualisierung von Musik und anderen Audiodateien.
 Ziel des Projektes ist es, die Computergraphik mit Tonwiedergabe zu kombinieren. Die Anwendung soll die Musik in Echtzeit analysieren und die Ergebnisse in Form von Animationen darstellen.
+Dieses Projekt ist auf [GitHub](https://github.com/MaZe3D/Hello_Space) verfügbar.
+Eine Demonstration des Shaders als Video ist auf [YouTube](https://youtu.be/-ILrTO3HTTI) verfügbar.
 
 ## Bauen
 Die Anwendung verwendet Betriebssystem-spezifische Bibliotheken, weshalb derzeit zur Ausführung Microsoft Windows benötigt wird.
@@ -62,7 +64,19 @@ public StereoAudio midData;
 public StereoAudio highData;
 ```
 
-Nun kann bei jedem Bild die aktuelle Wiedergabezeit herangezogen werden um die Samples zu berechnen welche in diesem Zeitraum abgespielt werden. Bei jedem Frame werden `0,1s` an Samples ausgewertet und arithmetisch gemittelt. Dies geschieht in der Funktion Get
+![Grafik zur Darstellung der Filterbänder.](doc/Infographics/AudioSamplesSplitting.svg)
+
+Nun kann bei jedem Bild die aktuelle Wiedergabezeit herangezogen werden um die Samples zu berechnen welche in diesem Zeitraum abgespielt werden. Bei jedem Frame werden `0,1s` an Samples ausgewertet und arithmetisch gemittelt. Dies geschieht in der Funktion `public StereoSample GetSampleAtTimeSpan(float offset, float time, AudioFrequencyBand band)`. Die Funktion gibt eine Instanz der Struktur `StereoSample` zurück.
+
+```cs
+public struct StereoSample
+{
+    public float Left;
+    public float Right;
+}
+```
+
+Die Mittelung wird für jeden Frequenzbereich und jeden Kanal einzeln durchgeführt. Das bedeutet bei einer Sampling Rate von `44,1 kHz` und `0,1 s` auszuwertenden Materials und sechs Sechs Sample-Arrays dass insgesamt `26460` Samples ausgewertet werden. Das sind viele Berechnungen, welche möglicherweise für zukünftige Updates optimiert werden können.
 
 
 ### Shader
@@ -74,6 +88,7 @@ Die OpenGL Shader Pipeline sieht mehrere unterschiedliche Shader vor um das Bild
 Der Vertex Shader ist ein programmierbarer Shader, der die Verarbeitung von einzelnen Vertices im Rendering-Pipeline übernimmt. Vertex-Shader erhalten Vertex-Attribute-Daten, die von einem Zeichenbefehl aus einem Vertex-Array-Objekt spezifiziert werden. Ein Vertex-Shader erhält einen einzelnen Vertex aus dem Vertex-Stream und generiert einen einzelnen Vertex für den Ausgangs-Vertex-Stream 1. Es muss eine 1:1-Zuordnung von Eingangs- zu Ausgangs-Vertices geben. Vertex-Shader führen in der Regel Transformationen in den Post-Projektionsraum durch, um von der Vertex-Post-Processing-Phase verarbeitet zu werden. Sie können auch verwendet werden, um pro-Vertex-Beleuchtung durchzuführen oder Setup-Arbeiten für spätere Shader-Stufen durchzuführen.
 
 Der für dieses Programm notwendige Shader genießt, da die eigentliche Bildberechnung erst im später folgenden Fragment-Shader erfolgt, eine untergeordnete Rolle. Das Hauptprogramm generiert eine kompakte liste an Koordinaten welche für die Generierung zweier Dreiecke verwendet werden.
+
 ```cs
 List<Vector2> vertices = new()
 {
@@ -84,7 +99,7 @@ List<Vector2> vertices = new()
 };
 ```
 
-Diese werden zu zwei Dreiecken zusammengesetzt um den gesamten Darstellungsbereich auszufüllen. Diese Dreiecke dienen sozusagen als Leinwand für den darauffolgenden Fragment-Shader welcher dann jedes Pixel individuell coloriert.
+Diese werden zu einem Rechteck zusammengesetzt um den gesamten Darstellungsbereich auszufüllen. Diese Dreiecke dienen sozusagen als Leinwand für den darauffolgenden Fragment-Shader welcher dann jedes Pixel individuell coloriert.
 
 ```glsl
 #version 430 core
@@ -96,7 +111,7 @@ void main()
     gl_Position = vec4(aPosition, 1., 1.); // coordinates
 }
 ```
-Der hier verwendete Vertex-Shader setzt die Eingangs-Vertex-Koordinaten und setzt `gl_Position` auf einen 4D-Vektor im homogenen Bildraum. Die Z-Koordinate, welche die Tiefeninformation im Raum darstellt, wird konstant auf 1.0 gesetzt, da es sich um ein zweidimensionales Bild auf der Basis des Fragment-Shaders handelt.
+Der hier verwendete Vertex-Shader setzt die Eingangs-Vertex-Koordinaten und setzt `gl_Position` auf einen 4D-Vektor im homogenen Bildraum. Die Z-Koordinate, welche die Tiefeninformation im Raum darstellt, wird konstant auf `1.0` gesetzt, da es sich um ein zweidimensionales Bild auf der Basis des Fragment-Shaders handelt.
 
 #### Fragment Shader
 Der Fragment-Shader ist, in diesem Fall, gänzlich für die Darstellung aller Anzeigeelemente des Programms verantwortlich.
@@ -126,6 +141,8 @@ layout(location = 9)  uniform vec2  mousePos; //audo sample
 layout(location = 10) uniform float mouseBloom; //radius of the mouseBloom
 ```
 
+Die Layout-Location gibt an an welcher Stelle der Variable in der Liste der uniform Variablen sich befindet. So kann man sich ein zur Laufzeitbasiertes Uniformsystem sparen und die Variablen ohne vorherige Abfrage der Location setzen. Diese Funktion existiert mit der [OpenGL Version 4.3](https://www.khronos.org/opengl/wiki/Uniform_(GLSL)#Explicit_uniform_location)(14.12.2023).
+
 Der `timestamp` gibt die Zeit in Sekunden vom Host an, was in diesem fall dem Wiedergabezeitpunkt entspricht. `resolution` gibt die Auflösung des Fensters an. `left_lowSample` bis `right_highSample` geben die Samples der einzelnen Filterbänder an. `audioDuration` gibt die Länge der Audiodatei in Sekunden an. `mousePos` gibt die Position des Mauszeigers an. `mouseBloom` gibt den Radius des Mauszeiger-Leuchteffekts an.
 
 Aus diesen Variablen werden nun weitere Globale variablen errechnet, welche für die Schadenberechnung hilfreich sind.
@@ -142,7 +159,7 @@ float audioProgressLeft = 1.0 - audioProgress;
 vec2  mousePosA         = vec2(mousePos.x * MAX_DIMENSIONS.x, mousePos.y * MAX_DIMENSIONS.y);
 ```
 
-`PI` ist eine Konstante welchen den Wert von PI definiert. Errechnet wurde dieser aus dem Funktionswert von `radians(180)`. Der Vector `UV` speichert die Koordinaten normalisiert von `(0|0)` in der unteren linken Ecke bis `(1|1)` in der oberen rechten Ecke. Da die Fenstergröße nicht zwangsläufig quadratische ist, und bei einem Seitenverhältnis ≠ 1 geometrische Formen wie Kreise und Quadrate verzerrt dargestellt werden würden, muss das Seitenverhältnis der Fenstergröße berücksichtigt werden. Dies geschieht durch die Variable `ASPECT_RATIO`. `ACORD` ist eine Variable welche die Koordinaten von `(0|0)` in der unteren linken Ecke bis `(ASPECT_RATIO | 1)` in der oberen rechten Ecke speichert. `MAX_DIMENSIONS` speichert die maximale Größe des Fensters `(ASPECT_RATIO, | 1.0)`. Im Vector `CENTER` werden die Koordinaten des Mittelpunkts des Fensters gespeichert. `audioProgress` speichert den Fortschritt der Widergabe von `0` (Anfang) bis `1` (Ende). `audioProgressLeft` speichert den Fortschritt der Wiedergabe in Sekunden, jedoch von hinten gezählt. `mousePosA` speichert die Koordinaten des Mauszeigers, jedoch mit dem Seitenverhältnis des Fensters berücksichtigt.
+`PI` ist eine Konstante welchen den Wert von PI definiert. Errechnet wurde dieser aus dem Funktionswert von `radians(180)`. Der Vector `UV` speichert die Koordinaten normalisiert von `(0|0)` in der unteren linken Ecke bis `(1|1)` in der oberen rechten Ecke. Da die Fenstergröße nicht zwangsläufig quadratische ist, und bei einem Seitenverhältnis ≠ 1 geometrische Formen wie Kreise und Quadrate verzerrt dargestellt werden würden, muss das Seitenverhältnis der Fenstergröße berücksichtigt werden. Dies geschieht durch die Variable `ASPECT_RATIO`. `ACORD` ist eine Variable welche die Koordinaten von `(0|0)` in der unteren linken Ecke bis `(ASPECT_RATIO | 1)` in der oberen rechten Ecke speichert. `MAX_DIMENSIONS` speichert die maximale Größe des Fensters `(ASPECT_RATIO | 1.0)`. Im Vector `CENTER` werden die Koordinaten des Mittelpunkts des Fensters gespeichert. `audioProgress` speichert den Fortschritt der Widergabe von `0` (Anfang) bis `1` (Ende). `audioProgressLeft` speichert den Fortschritt der Wiedergabe in Sekunden, jedoch von hinten gezählt. `mousePosA` speichert die Koordinaten des Mauszeigers, jedoch mit dem Seitenverhältnis des Fensters berücksichtigt.
 
 Der Shader wurde so aufgebaut dass eine Kollektion an Funktionen hochparametrisierten Funktionen existiert, mit deren Verkettung das darzustellende Pixel letztendlich berechnet wird.
 So kann beispielweise ein Quadrat erzeugt werden indem die Funktion `vec4 GenerateSqare(...)` aufruft.

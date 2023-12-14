@@ -134,7 +134,7 @@ namespace Hello_Space
                     break;
             }
 
-            var samples = (int)(time / (float)SecondsPerSample / 2);
+            var samples = (int)(time / (float)SecondsPerSample / audioFileReader.WaveFormat.Channels);
             int startIndex = (int)(offset / (float)SecondsPerSample);
             int endIndex = startIndex + samples;
 
