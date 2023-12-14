@@ -238,28 +238,7 @@ vec4 GenerateRoundedSquare(vec2 position, vec2 dimensions, float radius, vec4 co
     vec4 result = backgroundColor;
 
     // if dimensions are negative, shift the position and make them positive
-    if (dimensions.x < 0.0)
-    {
-        position.x += dimensions.x;
-        dimensions.x = -dimensions.x;
-    }
-    if (dimensions.y < 0.0)
-    {
-        position.y += dimensions.y;
-        dimensions.y = -dimensions.y;
-    }
-
-    float diameter = 2 * radius;
-
-    // if dimensions are smaller than the radius, make them equal to the diameter
-    if (dimensions.x < radius)
-    {
-        dimensions.x = diameter;
-    }
-    if (dimensions.y < radius)
-    {
-        dimensions.y = diameter;
-    }
+    /* [...] (Same as GenerateSquare) */
 
     vec2 circlePosition = position + radius;
     vec2 circleDimensions = dimensions - radius;
@@ -279,7 +258,9 @@ vec4 GenerateRoundedSquare(vec2 position, vec2 dimensions, float radius, vec4 co
 ```
 
 Die folgende Graphik zeigt die Überlagerung der einzelnen Komponenten.
-![Grafik zur Darstellung der Einzelkomponenten eines Rechtecks mit abgerundeten Ecken und Parameter der Funktion](doc/Infographics/RoundedSquare.svg)
+![Grafik zur Darstellung der Einzelkomponenten eines Rechtecks mit abgerundeten Ecken und Parameter der Funktion.](doc/Infographics/RoundedSquare.svg)
+
+Die Funktion `GenerateGlowingCircle(...)` erstellt einen Kreis welcher bis zu einem `minimumRadius` vollständig gefüllt ist und ab da, bis zu einem `maximumRadius` einen bis zu null absinkenden Transparenzeffekt. 
 
 ```glsl
 vec4 GenerateGlowingCircle(vec2 position, float minimumRadius, float maximumRadius, vec4 color, vec4 backgroundColor)
@@ -299,3 +280,16 @@ vec4 GenerateGlowingCircle(vec2 position, float minimumRadius, float maximumRadi
     return result;
 }
 ```
+
+Zur Berechnung wird wie beim normalen Kreis eine Distanz zum Mittelpunkt definiert, diesmal wird diese Distanz jedoch verwendet um den Farbwert linear auf die Hintergrundfarbe überzugehen.
+
+Das folgende Bild zeigt wie die Parameter der `GlowingFunction(...)` arbeiten.
+
+![Grafik zur Darstellung der Einzelkomponenten eines Kreises der ab einem Grenzradius bis zu einem Endradius.](doc/Infographics/GlowingCircle.svg)
+
+Das Programm ruft nun diese Funktionen auf um die Visualisierung anzuzeigen.
+
+---
+
+Nun kann der Shader aus allen Grundkomponenten zusammengesetzt werden.
+Zunächst wird ein geleichmäßiges Punkteraster auf dem Bildschirmhintergrund angezeigt. Das geschieht mit der `GeneratePointGrid(...)`-Funktion welche wiederholt die GenerateCircle Funktion aufruft.

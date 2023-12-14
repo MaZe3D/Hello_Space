@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 1192 693" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
+    <g transform="matrix(1,0,0,1,-53,-67)">
+        <rect x="105" y="117" width="1084" height="551" style="fill:rgb(230,230,230);"/>
+        <path d="M1193.17,117L1193.17,668C1193.17,670.301 1191.3,672.167 1189,672.167L105,672.167C102.699,672.167 100.833,670.301 100.833,668L100.833,117C100.833,114.699 102.699,112.833 105,112.833L1189,112.833C1191.3,112.833 1193.17,114.699 1193.17,117ZM1189,117L105,117L105,668L1189,668L1189,117Z"/>
+    </g>
+    <g transform="matrix(0.67713,0,0,0.67713,154.283,55.0448)">
+        <g transform="matrix(2.65882,0,0,2.65882,6.24451,-174.891)">
+            <circle cx="243" cy="216" r="47" style="fill:rgb(0,253,255);stroke:rgb(93,93,93);stroke-width:0.58px;"/>
+        </g>
+        <g transform="matrix(3.31775,0,0,3.43349,101.836,-326.45)">
+            <path d="M165.926,138.615C207.68,138.615 241.579,171.232 241.579,211.407C241.579,251.581 207.68,284.198 165.926,284.198C124.173,284.198 90.274,251.581 90.274,211.407C90.274,171.232 124.173,138.615 165.926,138.615ZM165.926,175.011C186.803,175.011 203.753,191.319 203.753,211.407C203.753,231.494 186.803,247.802 165.926,247.802C145.05,247.802 128.1,231.494 128.1,211.407C128.1,191.319 145.05,175.011 165.926,175.011Z" style="fill:url(#_Radial1);"/>
+            <path d="M165.926,138.078C207.988,138.078 242.135,170.936 242.135,211.407C242.135,251.877 207.988,284.736 165.926,284.736C123.865,284.736 89.718,251.877 89.718,211.407C89.718,170.936 123.865,138.078 165.926,138.078ZM165.926,138.615C124.173,138.615 90.274,171.232 90.274,211.407C90.274,251.581 124.173,284.198 165.926,284.198C207.68,284.198 241.579,251.581 241.579,211.407C241.579,171.232 207.68,138.615 165.926,138.615ZM165.926,175.011C186.803,175.011 203.753,191.319 203.753,211.407C203.753,231.494 186.803,247.802 165.926,247.802C145.05,247.802 128.1,231.494 128.1,211.407C128.1,191.319 145.05,175.011 165.926,175.011ZM165.926,175.549C145.357,175.549 128.657,191.615 128.657,211.407C128.657,231.198 145.357,247.265 165.926,247.265C186.495,247.265 203.196,231.198 203.196,211.407C203.196,191.615 186.495,175.549 165.926,175.549Z"/>
+        </g>
+    </g>
+    <g>
+        <g transform="matrix(0.643411,0,0,1,14.8385,-67)">
+            <rect x="195" y="700" width="129" height="31" style="fill:rgb(125,240,241);"/>
+        </g>
+        <g transform="matrix(1,0,0,1,-54,-67.0318)">
+            <g transform="matrix(21.741,0,0,21.741,265.766,723)">
+            </g>
+            <text x="206px" y="723px" style="font-family:'Consolas', monospace;font-size:21.741px;">Kreis</text>
+        </g>
+    </g>
+    <g>
+        <g transform="matrix(1.23469,0,0,1,-4.93904,-67)">
+            <rect x="195" y="700" width="129" height="31" style="fill:url(#_Linear2);"/>
+        </g>
+        <g transform="matrix(1,0,0,1,41.5215,-67.0318)">
+            <g transform="matrix(21.741,0,0,21.741,337.486,723)">
+            </g>
+            <text x="206px" y="723px" style="font-family:'Consolas', monospace;font-size:21.741px;">Farbverlauf</text>
+        </g>
+    </g>
+    <g transform="matrix(1,0,0,1,-144.718,-0.0636943)">
+        <g transform="matrix(0.937984,0,0,1,369.918,-66.9363)">
+            <rect x="195" y="700" width="129" height="31" style="fill:rgb(230,230,230);"/>
+        </g>
+        <g transform="matrix(1,0,0,1,358.522,-66.9682)">
+            <g transform="matrix(21.741,0,0,21.741,301.626,723)">
+            </g>
+            <text x="206px" y="723px" style="font-family:'Consolas', monospace;font-size:21.741px;">Leinwand</text>
+        </g>
+    </g>
+    <g transform="matrix(0.67713,0,0,0.708616,154.283,38.0426)">
+        <path d="M196,540L196,587L243,587" style="fill:none;stroke:rgb(93,93,93);stroke-width:1.5px;stroke-dasharray:1.5,7.52,0,0,0,0;"/>
+    </g>
+    <g transform="matrix(4.76642,0,0,1,-562.241,-214.5)">
+        <g transform="matrix(0.209801,-0,-0,1,117.959,214.5)">
+            <path d="M551.652,261.965L551.835,255.207L558.003,257.975" style="fill:none;stroke:black;stroke-width:1.25px;stroke-linejoin:miter;stroke-miterlimit:10;"/>
+            <path d="M596,325.5C596,325.5 557.149,263.665 551.835,255.207" style="fill:none;stroke:black;stroke-width:1.25px;"/>
+        </g>
+    </g>
+    <g transform="matrix(4.76642,0,0,1,-562.241,-214.5)">
+        <g transform="matrix(0.209801,-0,-0,1,117.959,214.5)">
+            <path d="M736.265,240.979L743.01,241.442L739.988,247.49" style="fill:none;stroke:black;stroke-width:1.25px;stroke-linejoin:miter;stroke-miterlimit:10;"/>
+            <path d="M596,325.5C596,325.5 730.206,248.763 743.01,241.442" style="fill:none;stroke:black;stroke-width:1.25px;"/>
+        </g>
+    </g>
+    <g transform="matrix(-11.5319,5.27298e-16,-1.22814e-14,-1,2854.26,865.5)">
+        <g transform="matrix(-0.0867159,-4.57251e-17,1.06499e-15,-1,247.509,865.5)">
+            <path d="M58.752,321.75L53.127,325.5L58.752,329.25" style="fill:none;stroke:black;stroke-width:1.25px;stroke-linejoin:miter;stroke-miterlimit:10;"/>
+            <path d="M589.366,321.75L593.116,325.5L589.366,329.25" style="fill:none;stroke:black;stroke-width:1.25px;stroke-linejoin:miter;stroke-miterlimit:10;"/>
+            <path d="M53.127,325.5L593.116,325.5" style="fill:none;stroke:black;stroke-width:1.25px;"/>
+        </g>
+    </g>
+    <g transform="matrix(-2.15669e-16,-5.8617,1,-6.50898e-15,56,1749.89)">
+        <g transform="matrix(-1.11042e-15,1,-0.170599,-3.67929e-17,298.53,-56)">
+            <path d="M599.75,330.134L596,326.384L592.25,330.134" style="fill:none;stroke:black;stroke-width:1.25px;stroke-linejoin:miter;stroke-miterlimit:10;"/>
+            <path d="M599.75,594.248L596,599.873L592.25,594.248" style="fill:none;stroke:black;stroke-width:1.25px;stroke-linejoin:miter;stroke-miterlimit:10;"/>
+            <path d="M596,326.384L596,599.873" style="fill:none;stroke:black;stroke-width:1.25px;"/>
+        </g>
+    </g>
+    <g transform="matrix(1.52197,0,0,1.52197,166.374,-579.935)">
+        <g transform="matrix(15.3565,0,0,15.3565,322.76,535)">
+        </g>
+        <text x="213px" y="535px" style="font-family:'Consolas', monospace;font-size:15.357px;">minimumRadius</text>
+    </g>
+    <g transform="matrix(1.52197,0,0,1.52197,440.749,-565.343)">
+        <g transform="matrix(15.3565,0,0,15.3565,322.76,535)">
+        </g>
+        <text x="213px" y="535px" style="font-family:'Consolas', monospace;font-size:15.357px;">maximumRadius</text>
+    </g>
+    <g transform="matrix(1.52197,0,0,1.52197,-122.228,-504.802)">
+        <g transform="matrix(15.3565,0,0,15.3565,297.431,535)">
+        </g>
+        <text x="213px" y="535px" style="font-family:'Consolas', monospace;font-size:15.357px;">position.x</text>
+    </g>
+    <g transform="matrix(1.52197,0,0,1.52197,281.067,-265.635)">
+        <g transform="matrix(15.3565,0,0,15.3565,297.431,535)">
+        </g>
+        <text x="213px" y="535px" style="font-family:'Consolas', monospace;font-size:15.357px;">position.y</text>
+    </g>
+    <g transform="matrix(1,0,0,1,400,-261.5)">
+        <g transform="matrix(1,0,0,1.16667,5,-107.167)">
+            <path d="M184,589L198,601" style="fill:none;stroke:rgb(226,0,30);stroke-width:3.83px;"/>
+        </g>
+        <g transform="matrix(1,0,0,1.16667,5,-107.167)">
+            <path d="M184,601L198,589" style="fill:none;stroke:rgb(226,0,30);stroke-width:3.83px;"/>
+        </g>
+    </g>
+    <defs>
+        <radialGradient id="_Radial1" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="matrix(-1.38971e-14,-73.1019,75.6523,-1.34286e-14,165.926,211.407)"><stop offset="0" style="stop-color:rgb(50,165,166);stop-opacity:1"/><stop offset="0.5" style="stop-color:rgb(0,253,255);stop-opacity:0.53"/><stop offset="0.74" style="stop-color:rgb(0,253,255);stop-opacity:0.39"/><stop offset="1" style="stop-color:rgb(0,253,255);stop-opacity:0"/></radialGradient>
+        <linearGradient id="_Linear2" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(129,0,0,159.275,195,715.5)"><stop offset="0" style="stop-color:rgb(0,253,255);stop-opacity:1"/><stop offset="0.52" style="stop-color:rgb(168,236,237);stop-opacity:1"/><stop offset="1" style="stop-color:rgb(230,230,230);stop-opacity:1"/></linearGradient>
+    </defs>
+</svg>
