@@ -8,6 +8,12 @@ Das Projekt basiert auf der [.NET 8.0 Plattform](https://dotnet.microsoft.com/en
 Die Anwendung kann mit dem Befehl `dotnet run` ausgeführt werden.
 Bei dem Bauvorgang wird das Verzeichnis `res/` vollständig zur Binary kopiert. Die Dateien in diesem Verzeichnis werden zur Laufzeit benötigt.
 
+## Systemanforderungen
+Die Anwendung benötigt einen modernen Grafikprozessor mit Unterstützung für OpenGL 4.3, sowie eine CPU mit mindestens 4 Kernen. 
+
+Getestet wurde die Anwendndung auf einem AMD Ryzen™ 7 2700X (8 Kerne, 16 Threads) und einer Nvidia GeForce RTX 2080Ti 6GB.
+Zusätzlich fand ein Laptop mit einem Intel® Core™ H35 i7-11370H. 
+
 ## Verwendung
 Das Programm benötigt eine Audiodatei im FLAC-Format. Diese muss im Verzeichnis `res/audio/` liegen und `audio.flac` heißen. Der `res/` Ordner muss sich im selben Verzeichnis wie die Binary befinden.
 
@@ -57,7 +63,7 @@ public StereoAudio highData;
 ### Shader
 Die Anwendung basiert auf OpenGL 4.3 und verwendet die [OpenTK](https://opentk.net/) Bibliothek für die Interaktion mit OpenGL. Die Shader werden mit [GLSL](https://www.khronos.org/opengl/wiki/Core_Language_(GLSL)) geschrieben.
 
-Die OpenGL Shader Pipeline sieht mehrere unterschiedliche Shader vor um das Bild (abschließend) zu berechnen. In dieser Anwendung findet der Vertex- und Fragment-Shader anwendung.
+Die OpenGL Shader Pipeline sieht mehrere unterschiedliche Shader vor um das Bild (abschließend) zu berechnen. In dieser Applikation findet der Vertex- und Fragment-Shader Anwendung.
 
 #### Vertex Shader
 Der Vertex Shader ist ein programmierbarer Shader, der die Verarbeitung von einzelnen Vertices im Rendering-Pipeline übernimmt. Vertex-Shader erhalten Vertex-Attribute-Daten, die von einem Zeichenbefehl aus einem Vertex-Array-Objekt spezifiziert werden. Ein Vertex-Shader erhält einen einzelnen Vertex aus dem Vertex-Stream und generiert einen einzelnen Vertex für den Ausgangs-Vertex-Stream 1. Es muss eine 1:1-Zuordnung von Eingangs- zu Ausgangs-Vertices geben. Vertex-Shader führen in der Regel Transformationen in den Post-Projektionsraum durch, um von der Vertex-Post-Processing-Phase verarbeitet zu werden. Sie können auch verwendet werden, um pro-Vertex-Beleuchtung durchzuführen oder Setup-Arbeiten für spätere Shader-Stufen durchzuführen.
@@ -99,8 +105,47 @@ out vec4 FragColor;
 in vec4 gl_FragCoord;
 ```
 
-Der Shader wurde so aufgebaut dass eine Kollektion an Funktionen hochparametrisierten Funktionen existiert, mit deren Verkettung das darzustellende Pixel leztendlich berechnet wird.
+Vorher muss müssen jedoch alle für den Shader benötigte und von dem Programm bereitgestellte Variablen deklariert werden. Nachfolgend die Liste aller uniform Variablen welche von dem Programm bereitgestellt werden.
+
+```glsl
+layout(location = 0)  uniform float timestamp; //time in seconds
+layout(location = 1)  uniform ivec2 resolution; //window resolution
+layout(location = 2)  uniform float left_lowSample; //audo sample
+layout(location = 3)  uniform float left_midSample; //audo sample
+layout(location = 4)  uniform float left_highSample; //audo sample
+layout(location = 5)  uniform float right_lowSample; //audo sample
+layout(location = 6)  uniform float right_midSample; //audo sample
+layout(location = 7)  uniform float right_highSample; //audo sample
+layout(location = 8)  uniform float audioDuration; //audo sample
+layout(location = 9)  uniform vec2 mousePos; //audo sample
+layout(location = 10) uniform float mouseBloom; //radius of the mouseBloom
+```
+
+Der `timestamp` gibt die Zeit in Sekunden vom Host an, was in diesem fall dem Wiedergabezeitpunkt entspricht. `resolution` gibt die Auflösung des Fensters an. `left_lowSample` bis `right_highSample` geben die Samples der einzelnen Filterbänder an. `audioDuration` gibt die Länge der Audiodatei in Sekunden an. `mousePos` gibt die Position des Mauszeigers an. `mouseBloom` gibt den Radius des Mauszeiger-Leuchteffekts an.
+
+Aus diesen Variablen werden nun weitere Globale variablen errechnet, welche für die Schadenberechnung hilfreich sind.
+
+```glsl
+const float PI          = radians(180);
+vec2  UV                = gl_FragCoord.xy / resolution.xy;
+float ASPECT_RATIO      = float(resolution.x) / float(resolution.y);
+vec2  ACORD             = vec2(UV.x * ASPECT_RATIO, UV.y);
+vec2  MAX_DIMENSIONS    = vec2(ASPECT_RATIO, 1.0);
+vec2  CENTER            = vec2(MAX_DIMENSIONS.x / 2, MAX_DIMENSIONS.y/2);
+float audioProgress     = timestamp / audioDuration;
+float audioProgressLeft = 1.0 - audioProgress;
+vec2  mousePosA         = vec2(mousePos.x * MAX_DIMENSIONS.x, mousePos.y * MAX_DIMENSIONS.y);
+```
+
+`PI` ist eine Konstante welchen den Wert von PI definiert. Errechnet wurde dieser aus dem Funktionswert von `radians(180)`. Der Vector `UV` speichert die Koordinaten normalisiert von `(0|0)` in der unteren linken Ecke bis `(1|1)` in der oberen rechten Ecke. Da die Fenstergröße nicht zwangsläufig quadratische ist, und bei einem Seitenverhältnis ≠ 1 geometrische Formen wie Kreise und Quadrate verzerrt dargestellt werden würden, muss das Seitenverhältnis der Fenstergröße berücksichtigt werden. Dies geschieht durch die Variable `ASPECT_RATIO`. `ACORD` ist eine Variable welche die Koordinaten von `(0|0)` in der unteren linken Ecke bis `(ASPECT_RATIO | 1)` in der oberen rechten Ecke speichert. `MAX_DIMENSIONS` speichert die maximale Größe des Fensters `(ASPECT_RATIO, | 1.0)`. Im Vector `CENTER` werden die Koordinaten des Mittelpunkts des Fensters gespeichert. `audioProgress` speichert den Fortschritt der Widergabe von `0` (Anfang) bis `1` (Ende). `audioProgressLeft` speichert den Fortschritt der Wiedergabe in Sekunden, jedoch von hinten gezählt. `mousePosA` speichert die Koordinaten des Mauszeigers, jedoch mit dem Seitenverhältnis des Fensters berücksichtigt.
+
+Der Shader wurde so aufgebaut dass eine Kollektion an Funktionen hochparametrisierten Funktionen existiert, mit deren Verkettung das darzustellende Pixel letztendlich berechnet wird.
 So kann beispielweise ein Quadrat erzeugt werden indem die Funktion `vec4 GenerateSqare(...)` aufruft.
+
+Die `GenerateSqare(...)` erstellt ein Quadrat auf dem Bildschirm. Dies geschieht indem die aktuelle Pixelposition in `ACORD` mit der Position und den Dimensionen des Quadrats verglichen wird. Ist der Pixel innerhalb des Quadrats wird die Farbe des Quadrats zurückgegeben, andernfalls die Hintergrundfarbe.
+
+Der Parameter der Hintergrundfarbe (`backgroundColor`) ist Praktisch um die möglicherweise von vorherigen Funktionen bereits beschriebene `FragColor` zu überschreiben.
+Falls die Größe des Rechtecks negativ ist, wird diese von der Position abgezogen und die Maße positiv gesetzt. Dies ist nützlich um die Funktion mit negativen Abmessungen aufzurufen.
 
 ```glsl
 vec4 GenerateSqare(vec2 position, vec2 dimentions, vec4 color, vec4 backgroundColor)
@@ -118,6 +163,7 @@ vec4 GenerateSqare(vec2 position, vec2 dimentions, vec4 color, vec4 backgroundCo
         position.y += dimentions.y;
         dimentions.y = -dimentions.y;
     }
+
     // Colorise the pixel if it is inside the square
     if (ACORD.x > position.x && ACORD.x < position.x + dimentions.x &&
         ACORD.y > position.y && ACORD.y < position.y + dimentions.y)
@@ -125,8 +171,131 @@ vec4 GenerateSqare(vec2 position, vec2 dimentions, vec4 color, vec4 backgroundCo
         result = color;
     }
 
-    // blend with the background color
     return result;
 }
 ```
 
+Die Nächste Funktion generiert eine Sinuswelle an beliebiger Höhe auf dem Bildschirm. `borderSize` gibt die Strickstärke der Welle an. `color` gibt die Farbe der Welle an. `backgroundColor` ist für Pixel welche außerhalb des Sinus liegen. Die Berechnung erfolgt indem der Sinus der aktuellen X-Koordinate mit den Parametern `frequency` und `phase` berechnet wird. Dieser Wert wird mit der `amplitude` multipliziert und mit der Y-Koordinate addiert. Der Abstand des Pixels zur Sinuswelle wird mit der `borderSize` verglichen. Ist der Abstand kleiner als die `borderSize` wird der Pixel coloriert.
+
+```glsl
+vec4 GenerateSinWave(vec2 position, float amplitude, float frequency, float phase,
+    float borderSize, vec4 color, vec4 backgroundColor)
+{
+    vec4 result = backgroundColor;
+
+    // Colorise the pixel if it is inside the sin wave
+    float sinValue = sin(2*PI*(ACORD.x - position.x) * frequency + phase) * amplitude + position.y;
+
+    float dist = abs(ACORD.y - sinValue);
+
+    if (dist < borderSize)
+    {
+        result = color;
+    }
+
+    result = FadeColor(result, backgroundColor);
+
+    return result;
+}
+```
+
+Da meist nicht die komplette Breite der Leinwand mit einem Sinus bedeckt sein soll, gibt es zusätzlich eine Funktion welche einen Sinus innerhalb eines Rechtecks maskiert. Dem `GenerateSquare(...)` wird als `color` der Aufruf von `GenerateSinWave(...)` übergeben. Dadurch werden nur die Pixel coloriert welche sich innerhalb des Rechtecks befinden und zur Sinusfunktion gehören.
+
+```glsl
+vec4 GenerateMaskSinWave(vec2 position, vec2 dimensions, float frequency, float phase, float sinOffset, float borderSize, vec4 color, vec4 backgroundColor)
+{
+    return GenerateSqare(position, dimensions, GenerateSinWave(vec2(position.x + sinOffset, position.y + dimensions.y / 2), (dimensions.y / 2) - borderSize, frequency, phase, borderSize, color, backgroundColor), backgroundColor);
+}
+```
+
+Die Funktion `GenerateCircle(...)` generiert einen Kreis auf dem Bildschirm. `position` gibt die Position des Kreismittelpunkts an. `radius` gibt den Radius des Kreises an. `color` gibt die Farbe des Kreises an. `backgroundColor` ist für Pixel welche außerhalb des Kreises liegen. Die Berechnung erfolgt indem die Distanz des Pixels zur Kreismitte berechnet wird. Ist die Distanz kleiner als der Radius wird der Pixel coloriert.
+```glsl
+vec4 GenerateCircle(vec2 position, float radius, vec4 color, vec4 backgroundColor)
+{
+    vec4 result = backgroundColor;
+
+    // blend with the background color
+
+    // Colorise the pixel if it is inside the circle
+    float dist = distance(ACORD, position);
+
+    if (dist < radius)
+    {
+        result = color;
+    }
+
+    result = FadeColor(result, backgroundColor);
+
+    return result;
+}
+```
+
+Kombiniert man nun vier Kreise und zwei Rechtecke, kann man mit einfachen mitteln ein Rechteck mit abgerundeten Ecken erzeugen. Dies geschieht indem die Kreise an den Ecken des Rechtecks positioniert werden und die Rechtecke die zwischen den Kreisen laufenden Flächen Ausfüllen.
+
+```glsl
+vec4 GenerateRoundedSquare(vec2 position, vec2 dimensions, float radius, vec4 color, vec4 backgroundColor)
+{
+    vec4 result = backgroundColor;
+
+    // if dimensions are negative, shift the position and make them positive
+    if (dimensions.x < 0.0)
+    {
+        position.x += dimensions.x;
+        dimensions.x = -dimensions.x;
+    }
+    if (dimensions.y < 0.0)
+    {
+        position.y += dimensions.y;
+        dimensions.y = -dimensions.y;
+    }
+
+    float diameter = 2 * radius;
+
+    // if dimensions are smaller than the radius, make them equal to the diameter
+    if (dimensions.x < radius)
+    {
+        dimensions.x = diameter;
+    }
+    if (dimensions.y < radius)
+    {
+        dimensions.y = diameter;
+    }
+
+    vec2 circlePosition = position + radius;
+    vec2 circleDimensions = dimensions - radius;
+
+    // Generate circles on the corners. The origin of the sqare is outside the rounded corners
+    result = GenerateCircle(vec2(circlePosition.x, circlePosition.y), radius, color, result);
+    result = GenerateCircle(vec2(position.x + circleDimensions.x, circlePosition.y), radius, color, result);
+    result = GenerateCircle(vec2(circlePosition.x, position.y + circleDimensions.y), radius, color, result);
+    result = GenerateCircle(vec2(position.x + circleDimensions.x, position.y + circleDimensions.y), radius, color, result);
+
+    // two sqares to fill the space between the circles
+    result = GenerateSqare(vec2(circlePosition.x, position.y), vec2(dimensions.x - diameter, dimensions.y), color, result);
+    result = GenerateSqare(vec2(position.x, circlePosition.y), vec2(dimensions.x, dimensions.y - diameter), color, result);
+
+    return result;
+}
+```
+
+Die folgende Graphik zeigt die Überlagerung der einzelnen Komponenten.
+![Grafik zur Darstellung der Einzelkomponenten eines Rechtecks mit abgerundeten Ecken und Parameter der Funktion](doc/Infographics/RoundedSquare.svg)
+
+```glsl
+vec4 GenerateGlowingCircle(vec2 position, float minimumRadius, float maximumRadius, vec4 color, vec4 backgroundColor)
+{
+    vec4 result = backgroundColor;
+
+    // Colorise the pixel if it is inside the circle
+    result = GenerateCircle(position, minimumRadius, color, result);
+
+    float dist = distance(ACORD, position);
+
+    if (dist > minimumRadius && dist < maximumRadius)
+    {
+        float alpha = 1 - (dist - minimumRadius) / (maximumRadius - minimumRadius);
+        result = mix(result, color, alpha * backgroundColor.a);
+    }
+    return result;
+}
+```

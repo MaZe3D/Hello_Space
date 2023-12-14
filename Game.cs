@@ -19,8 +19,7 @@ namespace Hello_Space
         {
             Audio = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
         };
-        Audio? audio;
-        double timeFromAudioStream = 0d;
+        Audio audio;
         StereoSample lowPassSample = new StereoSample(1f, 1f);
         StereoSample midPassSample = new StereoSample(1f, 1f);
         StereoSample highPassSample = new StereoSample(1f, 1f);
@@ -52,11 +51,13 @@ namespace Hello_Space
         // width and height of screen
         Vector2i resolution;
         bool mouseBloomEnabled = true;
-        float mouseBloom = 0.3f;
+        float mouseBloom = 0.2f;
         const string baseTitle = "MaZe Music Visualizer";
 
         // Constructor that sets the width, height, and calls the base constructor (GameWindow's Constructor) with default args
+#pragma warning disable CS8618 // Ein Non-Nullable-Feld muss beim Beenden des Konstruktors einen Wert ungleich NULL enthalten. Erwägen Sie die Deklaration als Nullable.
         public Game(int width, int height, int refreshRate) : base(GameWindowSettings.Default, NativeWindowSettings.Default)
+#pragma warning restore CS8618 // Ein Non-Nullable-Feld muss beim Beenden des Konstruktors einen Wert ungleich NULL enthalten. Erwägen Sie die Deklaration als Nullable.
         {
             this.resolution.X = width;
             this.resolution.Y = height;
@@ -154,7 +155,7 @@ namespace Hello_Space
                 {
                     Debug.WriteLine($"Error while loading audio: {e.Message}");
                     Debug.WriteLine($"Feature {nameof(features.Audio)} is disabled.");
-
+                    Close();
                 }
             }
             frameTime.Restart();
@@ -198,7 +199,7 @@ namespace Hello_Space
             GL.Uniform1((int)Locations.Right_LowSample, lowPassSample.Right);
             GL.Uniform1((int)Locations.Right_MidSample, midPassSample.Right);
             GL.Uniform1((int)Locations.Right_HighSample, highPassSample.Right);
-            GL.Uniform1((int)Locations.CompletePlayTime, (float)(audio?.Length.TotalSeconds ?? 50f));
+            GL.Uniform1((int)Locations.CompletePlayTime, (float)audio.Length.TotalSeconds);
             GL.Uniform2((int)Locations.MousePos, mousePos);
             GL.Uniform1((int)Locations.MouseBloom, mouseBloom);
 
@@ -210,7 +211,7 @@ namespace Hello_Space
             base.OnRenderFrame(args);
 
             while ((timeLastFrame = frameTime.Elapsed).TotalSeconds < 1d / refreshRate) ;
-            Title = $"{baseTitle} | FPS: {1f / timeLastFrame.TotalSeconds:0000} | Progress: {playTime.Elapsed:hh\\:mm\\:ss} / {audio?.Length ?? TimeSpan.Zero:hh\\:mm\\:ss}";
+            Title = $"{baseTitle} | FPS: {1f / timeLastFrame.TotalSeconds:0000} | Progress: {playTime.Elapsed:hh\\:mm\\:ss} / {audio.Length:hh\\:mm\\:ss}";
             frameTime.Restart();
         }
         // called every frame. All updating happens here
@@ -225,12 +226,16 @@ namespace Hello_Space
             try
             {
                 timestamp = (float)playTime.Elapsed.TotalSeconds;
+                if (timestamp > (float)audio.Length.TotalSeconds)
+                {
+                    timestamp = (float)audio.Length.TotalSeconds;
+                }
             }
             catch { }
 
-            lowPassSample = audio?.GetSampleAtTimeSpan(timestamp, sampleTime, AudioFrequencyBand.Bass) ?? new StereoSample(1f, 1f);
-            midPassSample = audio?.GetSampleAtTimeSpan(timestamp, sampleTime, AudioFrequencyBand.Mid) ?? new StereoSample(1f, 1f);
-            highPassSample = audio?.GetSampleAtTimeSpan(timestamp, sampleTime, AudioFrequencyBand.High) ?? new StereoSample(1f, 1f);
+            lowPassSample = audio.GetSampleAtTimeSpan(timestamp, sampleTime, AudioFrequencyBand.Bass);
+            midPassSample = audio.GetSampleAtTimeSpan(timestamp, sampleTime, AudioFrequencyBand.Mid);
+            highPassSample = audio.GetSampleAtTimeSpan(timestamp, sampleTime, AudioFrequencyBand.High);
         }
 
         // Handle Playback Stopped Event
@@ -238,8 +243,8 @@ namespace Hello_Space
         {
             Debug.WriteLine("Playback Stopped");
             // Restart Audio if it has finished
-            audio?.StartFromBeginning();
-            audio?.waveOut.Play();
+            audio.StartFromBeginning();
+            audio.waveOut.Play();
             playTime.Restart();
         }
 
@@ -314,18 +319,18 @@ namespace Hello_Space
             {
                 if (mousePos.Y < 0.07)
                 {
-                    audio?.waveOut.Pause();
+                    audio.waveOut.Pause();
                     float cursorpos = mousePos.X;
                     if (cursorpos < 0f) cursorpos = 0;
                     if (cursorpos > 0.99f) cursorpos = 0.99f;
-                    TimeSpan newTime = TimeSpan.FromSeconds(cursorpos * (float)(audio?.Length.TotalSeconds ?? TimeSpan.FromSeconds(60).TotalSeconds));
+                    TimeSpan newTime = TimeSpan.FromSeconds(cursorpos * (float)audio.Length.TotalSeconds);
                     Debug.WriteLine($"New Time: {newTime:c}");
-                    audio?.SetPlaybackPosition(newTime);
+                    audio.SetPlaybackPosition(newTime);
                     bool wasRunning = playTime.IsRunning;
                     playTime = new SettableStopwatch(audio.Time);
                     if (wasRunning)
                     {
-                        audio?.waveOut.Play();
+                        audio.waveOut.Play();
                         playTime.Start();
                     }
                 }
@@ -338,13 +343,13 @@ namespace Hello_Space
         {
             if (playTime.IsRunning)
             {
-                audio?.waveOut.Pause();
+                audio.waveOut.Pause();
                 playTime.Stop();
             }
             else
             {
-                audio?.waveOut.Play();
-                playTime = new SettableStopwatch(audio?.Time ?? playTime.Elapsed);
+                audio.waveOut.Play();
+                playTime = new SettableStopwatch(audio.Time);
                 playTime.Start();
             }
         }

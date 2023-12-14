@@ -3,27 +3,27 @@
 out vec4 FragColor;
 in vec4 gl_FragCoord;
 
-layout(location = 0) uniform float timestamp; //time in seconds
-layout(location = 1) uniform ivec2 resolution; //window resolution
-layout(location = 2) uniform float left_lowSample; //audo sample
-layout(location = 3) uniform float left_midSample; //audo sample
-layout(location = 4) uniform float left_highSample; //audo sample
-layout(location = 5) uniform float right_lowSample; //audo sample
-layout(location = 6) uniform float right_midSample; //audo sample
-layout(location = 7) uniform float right_highSample; //audo sample
-layout(location = 8) uniform float audioDuration; //audo sample
-layout(location = 9) uniform vec2 mousePos; //audo sample
+layout(location = 0)  uniform float timestamp; //time in seconds
+layout(location = 1)  uniform ivec2 resolution; //window resolution
+layout(location = 2)  uniform float left_lowSample; //audo sample
+layout(location = 3)  uniform float left_midSample; //audo sample
+layout(location = 4)  uniform float left_highSample; //audo sample
+layout(location = 5)  uniform float right_lowSample; //audo sample
+layout(location = 6)  uniform float right_midSample; //audo sample
+layout(location = 7)  uniform float right_highSample; //audo sample
+layout(location = 8)  uniform float audioDuration; //audo sample
+layout(location = 9)  uniform vec2  mousePos; //audo sample
 layout(location = 10) uniform float mouseBloom; //radius of the mouseBloom
 
-const float PI = radians(180);
-vec2  UV = gl_FragCoord.xy / resolution.xy;
-float ASPECT_RATIO = float(resolution.x) / float(resolution.y);
-vec2  ACORD = vec2(UV.x * ASPECT_RATIO, UV.y);
-vec2  MAX_DIMENSIONS = vec2(ASPECT_RATIO, 1.0);
-vec2  CENTER = vec2(MAX_DIMENSIONS.x / 2, MAX_DIMENSIONS.y/2);
-float audioProgress = timestamp / audioDuration;
+const float PI          = radians(180);
+vec2  UV                = gl_FragCoord.xy / resolution.xy;
+float ASPECT_RATIO      = float(resolution.x) / float(resolution.y);
+vec2  ACORD             = vec2(UV.x * ASPECT_RATIO, UV.y);
+vec2  MAX_DIMENSIONS    = vec2(ASPECT_RATIO, 1.0);
+vec2  CENTER            = vec2(MAX_DIMENSIONS.x / 2, MAX_DIMENSIONS.y/2);
+float audioProgress     = timestamp / audioDuration;
 float audioProgressLeft = 1.0 - audioProgress;
-vec2 mousePosA = vec2(mousePos.x * MAX_DIMENSIONS.x, mousePos.y * MAX_DIMENSIONS.y);
+vec2  mousePosA         = vec2(mousePos.x * MAX_DIMENSIONS.x, mousePos.y * MAX_DIMENSIONS.y);
 
 // Fade Color with Background Color
 vec4 FadeColor(vec4 color, vec4 backgroundColor)
@@ -81,7 +81,7 @@ vec4 GenerateSinWave(vec2 position, float amplitude, float frequency, float phas
 // Mask Sin Wave inside a square
 vec4 GenerateMaskSinWave(vec2 position, vec2 dimensions, float frequency, float phase, float sinOffset, float borderSize, vec4 color, vec4 backgroundColor)
 {
-    return GenerateSqare(position, dimensions , GenerateSinWave(vec2(position.x + sinOffset, position.y + dimensions.y / 2), (dimensions.y / 2) - borderSize, frequency, phase, borderSize, color, backgroundColor), backgroundColor);
+    return GenerateSqare(position, dimensions, GenerateSinWave(vec2(position.x + sinOffset, position.y + dimensions.y / 2), (dimensions.y / 2) - borderSize, frequency, phase, borderSize, color, backgroundColor), backgroundColor);
 }
 
 // Generate a circle on the screen
