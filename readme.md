@@ -28,13 +28,13 @@ Nach Programmstart lädt die Anwendung die Audiodatei und bereitet die Visualisi
 Am Ende der Audiowiedergabe wird die Wiedergabe von neuem gestartet. Die Anwendung kann mit der `Escape` Taste beendet werden.
 
 ### Tastenbelegung
-| Taste | Funktion |
-| --- | --- |
-| `Escape` | Beendet die Anwendung. |
-| `Leertaste` | Startet und Pausiert die Wiedergabe. |
-| `M` | Schaltet den Leuchteffekt rund um den Mauszeiger aus und an. |
-| `R` | Lädt alle Ressourcen (Shader und Audiodateien) neu und setzt die Wiedergabe auf den Beginn zurück. Kann genutzt werden um einen anderen, kompatiblen Shader während der Laufzeit zu laden oder die Audiodatei während der Laufzeit zu wechseln. |
-| `S` | Gibt einen detaillierte Informationen zu den berechneten Frequenzen im Standard Debug Output aus. |
+| Taste       | Funktion                                                                                                                                                                                                                                        |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Escape`    | Beendet die Anwendung.                                                                                                                                                                                                                          |
+| `Leertaste` | Startet und Pausiert die Wiedergabe.                                                                                                                                                                                                            |
+| `M`         | Schaltet den Leuchteffekt rund um den Mauszeiger aus und an.                                                                                                                                                                                    |
+| `R`         | Lädt alle Ressourcen (Shader und Audiodateien) neu und setzt die Wiedergabe auf den Beginn zurück. Kann genutzt werden um einen anderen, kompatiblen Shader während der Laufzeit zu laden oder die Audiodatei während der Laufzeit zu wechseln. |
+| `S`         | Gibt einen detaillierte Informationen zu den berechneten Frequenzen im Standard Debug Output aus.                                                                                                                                               |
 
 ### Maussteuerung
 Die Software verfügt über die Möglichkeit mithilfe eines Mausklicks oder -ziehens die Wiedergabeposition anzupassen. Hierfür muss auf dem Fortschrittsbalken auf dem unteren Bildschirmrand geklickt werden.
