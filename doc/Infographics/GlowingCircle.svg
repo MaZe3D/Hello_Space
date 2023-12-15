@@ -44,9 +44,6 @@
             <text x="206px" y="723px" style="font-family:'Consolas', monospace;font-size:21.741px;">Leinwand</text>
         </g>
     </g>
-    <g transform="matrix(0.67713,0,0,0.708616,154.283,38.0426)">
-        <path d="M196,540L196,587L243,587" style="fill:none;stroke:rgb(93,93,93);stroke-width:1.5px;stroke-dasharray:1.5,7.52,0,0,0,0;"/>
-    </g>
     <g transform="matrix(4.76642,0,0,1,-562.241,-214.5)">
         <g transform="matrix(0.209801,-0,-0,1,117.959,214.5)">
             <path d="M551.652,261.965L551.835,255.207L558.003,257.975" style="fill:none;stroke:black;stroke-width:1.25px;stroke-linejoin:miter;stroke-miterlimit:10;"/>

@@ -1,33 +1,40 @@
 # MaZe Music Visualizer
+
 Der MaZe Music Visualizer ist eine graphische Desktopanwendung zur Visualisierung von Musik und anderen Audiodateien.
 Ziel des Projektes ist es, die Computergraphik mit Tonwiedergabe zu kombinieren. Die Anwendung soll die Musik in Echtzeit analysieren und die Ergebnisse in Form von Animationen darstellen.
 Dieses Projekt ist auf [GitHub](https://github.com/MaZe3D/Hello_Space) verfügbar.
 Eine Demonstration des Shaders als Video ist auf [YouTube](https://youtu.be/-ILrTO3HTTI) verfügbar.
 
 ## Bauen
+
 Die Anwendung verwendet Betriebssystem-spezifische Bibliotheken, weshalb derzeit zur Ausführung Microsoft Windows benötigt wird.
 Das Projekt basiert auf der [.NET 8.0 Plattform](https://dotnet.microsoft.com/en-us/download) und kann mit dem .NET SDK gebaut werden.
 Die Anwendung kann mit dem Befehl `dotnet run` ausgeführt werden.
 Bei dem Bauvorgang wird das Verzeichnis `res/` vollständig zur Binary kopiert. Die Dateien in diesem Verzeichnis werden zur Laufzeit benötigt.
 
 ## Systemanforderungen
+
 Die Anwendung benötigt einen modernen Grafikprozessor mit Unterstützung für OpenGL 4.3, sowie eine CPU mit mindestens 4 Kernen.
 
 Getestet wurde die Anwendung auf einem AMD Ryzen™ 7 2700X (8 Kerne, 16 Threads) und einer Nvidia GeForce™ RTX 2080 Ti mit 11GB.
 Zusätzlich fand ein Laptop mit einem Intel® Core™ H35 i7-11370H und einer Nvidia GeForce™ RTX 3050 Ti Laptop GPU mit 6GB Verwendung.
 Auf beiden Systemen war der Shader ohne Probleme ausführbar, jedoch ist die Berechnung der Audio Samples für jeden Frame rechenaufwendig, weshalb bei Laptops die Verwendung eines Netzteils empfohlen wird, um die volle Leistung des Systems zu gewährleisten.
 
+Falls mehrere GPUs im System vorhanden sind (beispielweise iGPU und dedizierte Graphikkarte) sollte für die Anwendung die stärkere zur Ausführung ausgewählt werden.
+
 In voller Geschwindigkeit läuft die Anwendung mit ca. 120 FPS, darunter ist ein Leistungsgrenze erkenntlich.
 
 Aufgrund von Betriebssystemspezifischen Funktionen ist die Anwendung derzeit nur unter Microsoft Windows ausführbar. Getestet wurde `Windows 11 Version 23H2 (Build 22631.2792)`.
 
 ## Verwendung
+
 Das Programm benötigt eine Audiodatei im FLAC-Format. Diese muss im Verzeichnis `res/audio/` liegen und `audio.flac` heißen. Der `res/` Ordner muss sich im selben Verzeichnis wie die Binary befinden.
 
 Nach Programmstart lädt die Anwendung die Audiodatei und bereitet die Visualisierung vor. Dieser Vorgang kann einige Sekunden dauern. Währenddessen wird ein schwarzer Bildschirm angezeigt. Sobald die Anwendung zur Wiedergabe bereit ist, ist im Titelbalken neben dem Anwendungstitel die Bildwiederholrate und die aktuelle Wiedergabezeit zu sehen. Die Wiedergabe kann mit der `Leertaste` gestartet und pausiert werden.
 Am Ende der Audiowiedergabe wird die Wiedergabe von neuem gestartet. Die Anwendung kann mit der `Escape` Taste beendet werden.
 
 ### Tastenbelegung
+
 | Taste       | Funktion                                                                                                                                                                                                                                        |
 | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `Escape`    | Beendet die Anwendung.                                                                                                                                                                                                                          |
@@ -37,12 +44,15 @@ Am Ende der Audiowiedergabe wird die Wiedergabe von neuem gestartet. Die Anwendu
 | `S`         | Gibt einen detaillierte Informationen zu den berechneten Frequenzen im Standard Debug Output aus.                                                                                                                                               |
 
 ### Maussteuerung
+
 Die Software verfügt über die Möglichkeit mithilfe eines Mausklicks oder -ziehens die Wiedergabeposition anzupassen. Hierfür muss auf dem Fortschrittsbalken auf dem unteren Bildschirmrand geklickt werden.
 
 ## Funktionsweise
+
 Der Programmablauf sieht vor dass zunächst das Fenster erstellt wird. Im Konstruktor des Fensters wird ebenfalls die Audiobibliothek initialisiert. Darauf hin werden sämtliche Vorbereitungen zur Darstellung des Shaders getroffen. Der Vertex und Fragment Shader werden geladen und schließlich werden die Bilder berechnet.
 
 ### Audio
+
 Zur Aufbereitung der Audiodaten bedarf es einiger schritte, sodass die Visualisierung ansprechend aussieht.
 Be der Initialisierung der `Audio` Klasse wird zunächst die Audiodatei eingelesen. Daraufhin werden alle Samples aus dem Audiostream ausgelesen.
 
@@ -60,6 +70,7 @@ Um nun für den Shader die daten aufzubereiten werden beide Kanäle gefiltert. E
 Der Tiefpass hat eine Grenzfrequenz von 200 Hz, der Bandpass arbeitet um ca. 600 Hz und der Hochpass hat eine Grenzfrequenz von 1000 Hz.
 
 Nach der Filterung befinden sich die Samples in den respektiven `StereoAudio` Instanzen in der `Audio`-Klasse.
+
 ```cs
 public StereoAudio bassData;
 public StereoAudio midData;
@@ -80,13 +91,14 @@ public struct StereoSample
 
 Die Mittelung wird für jeden Frequenzbereich und jeden Kanal einzeln durchgeführt. Das bedeutet bei einer Sampling Rate von `44,1 kHz` und `0,1 s` auszuwertenden Materials und sechs Sechs Sample-Arrays dass insgesamt `26460` Samples ausgewertet werden. Das sind viele Berechnungen, welche möglicherweise für zukünftige Updates optimiert werden können.
 
-
 ### Shader
+
 Die Anwendung basiert auf OpenGL 4.3 und verwendet die [OpenTK](https://opentk.net/) Bibliothek für die Interaktion mit OpenGL. Die Shader werden mit [GLSL](https://www.khronos.org/opengl/wiki/Core_Language_(GLSL)) geschrieben.
 
 Die OpenGL Shader Pipeline sieht mehrere unterschiedliche Shader vor um das Bild (abschließend) zu berechnen. In dieser Applikation findet der Vertex- und Fragment-Shader Anwendung.
 
 #### Vertex Shader
+
 Der Vertex Shader ist ein programmierbarer Shader, der die Verarbeitung von einzelnen Vertices im Rendering-Pipeline übernimmt. Vertex-Shader erhalten Vertex-Attribute-Daten, die von einem Zeichenbefehl aus einem Vertex-Array-Objekt spezifiziert werden. Ein Vertex-Shader erhält einen einzelnen Vertex aus dem Vertex-Stream und generiert einen einzelnen Vertex für den Ausgangs-Vertex-Stream 1. Es muss eine 1:1-Zuordnung von Eingangs- zu Ausgangs-Vertices geben. Vertex-Shader führen in der Regel Transformationen in den Post-Projektionsraum durch, um von der Vertex-Post-Processing-Phase verarbeitet zu werden. Sie können auch verwendet werden, um pro-Vertex-Beleuchtung durchzuführen oder Setup-Arbeiten für spätere Shader-Stufen durchzuführen.
 
 Der für dieses Programm notwendige Shader genießt, da die eigentliche Bildberechnung erst im später folgenden Fragment-Shader erfolgt, eine untergeordnete Rolle. Das Hauptprogramm generiert eine kompakte liste an Koordinaten welche für die Generierung zweier Dreiecke verwendet werden.
@@ -113,9 +125,11 @@ void main()
     gl_Position = vec4(aPosition, 1., 1.); // coordinates
 }
 ```
+
 Der hier verwendete Vertex-Shader setzt die Eingangs-Vertex-Koordinaten und setzt `gl_Position` auf einen 4D-Vektor im homogenen Bildraum. Die Z-Koordinate, welche die Tiefeninformation im Raum darstellt, wird konstant auf `1.0` gesetzt, da es sich um ein zweidimensionales Bild auf der Basis des Fragment-Shaders handelt.
 
 #### Fragment Shader
+
 Der Fragment-Shader ist, in diesem Fall, gänzlich für die Darstellung aller Anzeigeelemente des Programms verantwortlich.
 
 Der Fragment-Shader wird für jedes einzelne Pixel welches sich auf der Leinwand befindet aufgerufen. Für eine Anwendung mit eine Auflösung von 1920x1080 Pixeln entspricht das 2.073.600 Mal.
@@ -233,6 +247,7 @@ vec4 GenerateMaskSinWave(vec2 position, vec2 dimensions, float frequency, float 
 ```
 
 Die Funktion `GenerateCircle(...)` generiert einen Kreis auf dem Bildschirm. `position` gibt die Position des Kreismittelpunkts an. `radius` gibt den Radius des Kreises an. `color` gibt die Farbe des Kreises an. `backgroundColor` ist für Pixel welche außerhalb des Kreises liegen. Die Berechnung erfolgt indem die Distanz des Pixels zur Kreismitte berechnet wird. Ist die Distanz kleiner als der Radius wird der Pixel coloriert.
+
 ```glsl
 vec4 GenerateCircle(vec2 position, float radius, vec4 color, vec4 backgroundColor)
 {
@@ -284,7 +299,7 @@ vec4 GenerateRoundedSquare(vec2 position, vec2 dimensions, float radius, vec4 co
 Die folgende Graphik zeigt die Überlagerung der einzelnen Komponenten.
 ![Grafik zur Darstellung der Einzelkomponenten eines Rechtecks mit abgerundeten Ecken und Parameter der Funktion.](doc/Infographics/RoundedSquare.svg)
 
-Die Funktion `GenerateGlowingCircle(...)` erstellt einen Kreis welcher bis zu einem `minimumRadius` vollständig gefüllt ist und ab da, bis zu einem `maximumRadius` einen bis zu null absinkenden Transparenzeffekt. 
+Die Funktion `GenerateGlowingCircle(...)` erstellt einen Kreis welcher bis zu einem `minimumRadius` vollständig gefüllt ist und ab da, bis zu einem `maximumRadius` einen bis zu null absinkenden Transparenzeffekt.
 
 ```glsl
 vec4 GenerateGlowingCircle(vec2 position, float minimumRadius, float maximumRadius, vec4 color, vec4 backgroundColor)
@@ -329,6 +344,7 @@ Der Mauszeiger wird durch einen Kreis mit Glow-Effekt dargestellt. Der Radius de
 
 ---
 
-# Lizenz
+## Lizenz
+
 Die Anwendung steht unter der MIT Lizenz. Das bedeutet, dass der Quellcode frei verwendet werden darf, solange die Lizenzbedingungen eingehalten werden. Die Lizenzbedingungen sind in der Datei `LICENSE` zu finden.
 Die im Repository befindliche Audiodatei im Verzeichnis [`/res/audio/audio.flac`](res/audio/audio.flac) steht unter dem Copyright von Mark Orlando Zeller. Die Datei steht lediglich zu Bildungszwecken und zur Evaluierung der Funktionsweise dieses Projektes zur Verfügung.
